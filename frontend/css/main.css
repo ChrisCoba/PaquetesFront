@@ -8471,6 +8471,135 @@ section,
   }
 }
 
+
+
+
+/*--------------------------------------------------------------
+# Cart Section
+--------------------------------------------------------------*/
+#shopping-cart {
+  padding: 60px 0;
+}
+
+.cart-items {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.cart-items h2 {
+  margin-bottom: 20px;
+  font-weight: 600;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.cart-item {
+  padding: 15px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.cart-item:last-child {
+  border-bottom: none;
+}
+
+.item-details {
+  gap: 15px;
+}
+
+.item-image {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.item-details h5 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.item-details p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #777;
+}
+
+.item-quantity input {
+  width: 70px;
+  text-align: center;
+}
+
+.item-price {
+  font-weight: 600;
+  font-size: 1rem;
+  min-width: 80px;
+  text-align: right;
+}
+
+.cart-item .btn {
+  transition: transform 0.2s ease;
+}
+
+.cart-item .btn:hover {
+  transform: scale(1.05);
+}
+
+/* ===== Payment Summary ===== */
+.payment-summary {
+  background: #fff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  position: sticky;
+  top: 100px;
+}
+
+.payment-summary h4 {
+  margin-bottom: 20px;
+  font-weight: 600;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.summary-item,
+.summary-total {
+  margin-bottom: 10px;
+}
+
+.summary-total h5 {
+  font-weight: 700;
+}
+
+.payment-summary .btn {
+  margin-top: 15px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .cart-item {
+    flex-wrap: wrap;
+    text-align: center;
+  }
+
+  .item-details {
+    justify-content: center;
+  }
+
+  .item-price,
+  .item-quantity {
+    margin-top: 10px;
+  }
+
+  .payment-summary {
+    margin-top: 30px;
+    position: static;
+  }
+}
+
+
+
 /*--------------------------------------------------------------
 # Starter Section Section
 --------------------------------------------------------------*/
