@@ -8503,8 +8503,6 @@ section,
 }
 
 
-
-
 /*--------------------------------------------------------------
 # Cart Section
 --------------------------------------------------------------*/
@@ -8629,7 +8627,57 @@ section,
   }
 }
 
+/*--------------------------------------------------------------
+# User Dashboard Section
+--------------------------------------------------------------*/
 
+ .user-profile-section .nav-pills .nav-link {
+      color: var(--default-color);
+    }
+
+    .user-profile-section .nav-pills .nav-link.active {
+      color: var(--contrast-color);
+      background-color: var(--accent-color);
+    }
+
+    .user-profile-section .list-group-item {
+      border: 1px solid var(--border-color);
+    }
+    .user-profile-section .list-group-item strong {
+      color: var(--heading-color);
+    }
+
+/*--------------------------------------------------------------
+# Admin Dashboard Section
+--------------------------------------------------------------*/
+
+    .admin-dashboard .admin-section h2 {
+      color: var(--heading-color);
+      font-weight: 700;
+      margin-bottom: 30px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid var(--accent-color);
+      display: inline-block;
+    }
+
+    .admin-dashboard .card {
+      border: 1px solid color-mix(in srgb, var(--default-color), transparent 90%);
+      transition: all 0.3s ease;
+      height: 100%;
+    }
+
+    .admin-dashboard .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px color-mix(in srgb, var(--default-color), transparent 88%);
+    }
+
+    .admin-dashboard .card-title {
+      font-weight: 600;
+    }
+
+    .management-view {
+      animation: fadeIn 0.5s;
+    }
 
 /*--------------------------------------------------------------
 # Starter Section Section
