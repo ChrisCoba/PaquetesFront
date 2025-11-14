@@ -5,7 +5,7 @@
   # Comando para construir el proyecto (ej. npm install && npm run build)
   command = "npm run build"
   # Directorio que Netlify debe publicar
-  publish = "frontend/dist/"
+  publish = "dist/"
 
 [[redirects]]
   from = "/*"
