@@ -6,8 +6,3 @@
   command = "npm run build"
   # Directorio que Netlify debe publicar
   publish = "dist/"
-
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
