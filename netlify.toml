@@ -1,0 +1,13 @@
+ # Configuración para construir el proyecto
+[build]
+  # Directorio base donde se encuentra el código fuente del frontend
+  base = "frontend/"
+  # Comando para construir el proyecto (ej. npm install && npm run build)
+  command = "npm run build"
+  # Directorio que Netlify debe publicar
+  publish = "frontend/dist/"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
