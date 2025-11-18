@@ -10,5 +10,8 @@
   },
   "devDependencies": {
     "vite": "^7.2.2"
+  },
+  "dependencies": {
+    "serve": "^14.2.5"
   }
 }
