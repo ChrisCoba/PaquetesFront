@@ -1,0 +1,11 @@
+{
+    "name": "agencia-front-root",
+    "private": true,
+    "workspaces": [
+        "frontend"
+    ],
+    "scripts": {
+        "build": "npm run build --workspace=frontend",
+        "start": "npm run start --workspace=frontend"
+    }
+}
