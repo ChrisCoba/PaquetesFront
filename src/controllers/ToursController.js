@@ -35,7 +35,27 @@ export const ToursController = {
         container.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
 
         try {
-            const tours = await PaquetesService.search(filters);
+            // Fetch all tours first (API doesn't support filtering)
+            let tours = await PaquetesService.search({});
+
+            // Client-side filtering
+            if (filters.city) {
+                tours = tours.filter(tour => tour.Ciudad === filters.city);
+            }
+
+            if (filters.precioMax) {
+                tours = tours.filter(tour => tour.PrecioActual <= parseFloat(filters.precioMax));
+            }
+
+            if (filters.duration) {
+                const [min, max] = filters.duration.split('-').map(Number);
+                if (!isNaN(min) && !isNaN(max)) {
+                    tours = tours.filter(tour => tour.Duracion >= min && tour.Duracion <= max);
+                }
+            }
+
+            // Note: 'tipoActividad' filtering is skipped as API data doesn't match 'adventure'/'luxury' categories
+
             ToursController.renderTours(tours, container);
         } catch (error) {
             console.error('Failed to load tours:', error);
@@ -162,6 +182,9 @@ export const ToursController = {
         const priceRange = document.getElementById('filter-price')?.value ||
             document.querySelector('select[aria-label="Price Range"]')?.value || '';
 
+        const duration = document.getElementById('filter-duration')?.value ||
+            document.querySelector('select[aria-label="Duration"]')?.value || '';
+
         // Parse price range if needed, e.g., "0-500"
         let precioMax = null;
         if (priceRange) {
@@ -172,7 +195,8 @@ export const ToursController = {
         const filters = {
             city: destination,
             tipoActividad: type,
-            precioMax: precioMax
+            precioMax: precioMax,
+            duration: duration
         };
 
         // Remove empty keys
