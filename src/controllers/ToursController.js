@@ -56,17 +56,17 @@ export const ToursController = {
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="tour-card">
                         <div class="tour-image">
-                            <img src="${tour.imagenUrl || '../assets/img/travel/tour-1.webp'}" alt="${tour.nombre}" class="img-fluid" style="height: 250px; object-fit: cover; width: 100%;">
-                            <div class="tour-price">$${tour.precioActual}</div>
+                            <img src="${tour.ImagenUrl || '../assets/img/travel/tour-1.webp'}" alt="${tour.Nombre}" class="img-fluid" style="height: 250px; object-fit: cover; width: 100%;">
+                            <div class="tour-price">$${tour.PrecioActual}</div>
                         </div>
                         <div class="tour-content">
-                            <h4>${tour.nombre}</h4>
-                            <p>${tour.descripcion || `Experience ${tour.ciudad}, ${tour.pais}`}</p>
+                            <h4>${tour.Nombre}</h4>
+                            <p>${tour.Descripcion || `Experience ${tour.Ciudad}, ${tour.Pais}`}</p>
                             <div class="tour-details">
-                                <span><i class="bi bi-clock"></i> ${tour.duracion} Days</span>
-                                <span><i class="bi bi-geo-alt"></i> ${tour.ciudad}</span>
+                                <span><i class="bi bi-clock"></i> ${tour.Duracion} Days</span>
+                                <span><i class="bi bi-geo-alt"></i> ${tour.Ciudad}</span>
                             </div>
-                            <a href="#" class="btn btn-outline-primary w-100 mt-3" onclick="window.location.href='tour-details.html?id=${tour.idPaquete}'">View Details</a>
+                            <a href="#" class="btn btn-outline-primary w-100 mt-3" onclick="window.location.href='tour-details.html?id=${tour.IdPaquete}'">View Details</a>
                         </div>
                     </div>
                 </div>
@@ -104,13 +104,13 @@ export const ToursController = {
                 <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up">
                     <div class="card h-100 shadow-sm border-0">
                         <div class="position-relative">
-                            <img src="${tour.imagenUrl || 'assets/img/travel/tour-1.webp'}" class="card-img-top rounded-top" alt="${tour.nombre}" style="height: 200px; object-fit: cover;">
-                            <div class="position-absolute top-0 end-0 m-2 badge bg-primary">$${tour.precioActual}</div>
+                            <img src="${tour.ImagenUrl || 'assets/img/travel/tour-1.webp'}" class="card-img-top rounded-top" alt="${tour.Nombre}" style="height: 200px; object-fit: cover;">
+                            <div class="position-absolute top-0 end-0 m-2 badge bg-primary">$${tour.PrecioActual}</div>
                         </div>
                         <div class="card-body">
-                            <h5 class="card-title fw-bold text-truncate">${tour.nombre}</h5>
-                            <p class="card-text small text-muted mb-2"><i class="bi bi-geo-alt-fill text-danger"></i> ${tour.ciudad}, ${tour.pais}</p>
-                            <p class="card-text text-truncate small">${tour.descripcion || `Experience ${tour.ciudad}`}</p>
+                            <h5 class="card-title fw-bold text-truncate">${tour.Nombre}</h5>
+                            <p class="card-text small text-muted mb-2"><i class="bi bi-geo-alt-fill text-danger"></i> ${tour.Ciudad}, ${tour.Pais}</p>
+                            <p class="card-text text-truncate small">${tour.Descripcion || `Experience ${tour.Ciudad}`}</p>
                             <a href="pages/tours.html" class="btn btn-sm btn-outline-primary w-100 mt-2">View Details</a>
                         </div>
                     </div>
@@ -127,7 +127,7 @@ export const ToursController = {
         try {
             const tours = await PaquetesService.search({});
             // Extract unique cities
-            const cities = [...new Set(tours.map(tour => tour.ciudad))].sort();
+            const cities = [...new Set(tours.map(tour => tour.Ciudad))].sort();
 
             // Clear existing options except the first one
             while (select.options.length > 1) {
