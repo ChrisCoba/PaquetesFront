@@ -103,8 +103,6 @@
                     <label for="destination">Destination</label>
                     <select name="destination" id="destination" class="form-select" required="">
                       <option value="">Choose your destination</option>
-                      <option value="europe">Guayaquil</option>
-                      <option value="asia">San Juan</option>
                     </select>
                   </div>
 
@@ -215,107 +213,8 @@
 
       <div class="container" data-aos="fade-up" data-aos-delay="100">
 
-        <div class="row">
-
-          <div class="col-lg-6" data-aos="zoom-in" data-aos-delay="200">
-            <div class="featured-destination">
-              <div class="destination-overlay">
-                <img src="assets/img/travel/destination-3.webp" alt="Tropical Paradise" class="img-fluid">
-                <div class="destination-info">
-                  <span class="destination-tag">Popular Choice</span>
-                  <h3>Tropical Paradise</h3>
-                  <p class="location"><i class="bi bi-geo-alt-fill"></i> Maldives</p>
-                  <p class="description">Pristine beaches, crystal-clear waters, and luxury overwater villas await in
-                    this tropical paradise destination.</p>
-                  <div class="destination-meta">
-                    <div class="tours-count">
-                      <i class="bi bi-collection"></i>
-                      <span>22 Packages</span>
-                    </div>
-                    <div class="rating">
-                      <i class="bi bi-star-fill"></i>
-                      <span>4.9 (412)</span>
-                    </div>
-                  </div>
-                  <div class="price-info">
-                    <span class="starting-from">Starting from</span>
-                    <span class="amount">$2,150</span>
-                  </div>
-                  <a href="pages/destinations.html" class="explore-btn">
-                    <span>Explore Now</span>
-                    <i class="bi bi-arrow-right"></i>
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-lg-6">
-            <div class="row g-3">
-
-              <div class="col-12" data-aos="fade-left" data-aos-delay="300">
-                <div class="compact-destination">
-                  <div class="destination-image">
-                    <img src="assets/img/travel/destination-7.webp" alt="Mountain Adventure" class="img-fluid">
-                    <div class="badge-offer">Best Value</div>
-                  </div>
-                  <div class="destination-details">
-                    <h4>Mountain Adventure</h4>
-                    <p class="location"><i class="bi bi-geo-alt"></i> Nepal</p>
-                    <p class="brief">Breathtaking Himalayan peaks and ancient Buddhist temples create an unforgettable
-                      spiritual journey.</p>
-                    <a href="pages/destinations.html" class="quick-link">View Details <i
-                        class="bi bi-chevron-right"></i></a>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-12" data-aos="fade-left" data-aos-delay="400">
-                <div class="compact-destination">
-                  <div class="destination-image">
-                    <img src="assets/img/travel/destination-11.webp" alt="Cultural Heritage" class="img-fluid">
-                  </div>
-                  <div class="destination-details">
-                    <h4>Cultural Heritage</h4>
-                    <p class="location"><i class="bi bi-geo-alt"></i> Peru</p>
-                    <p class="brief">Discover ancient civilizations, colorful markets, and archaeological wonders in the
-                      heart of South America.</p>
-                    <div class="stats-row">
-                      <span class="tour-count"><i class="bi bi-calendar-check"></i> 9 Expeditions</span>
-                      <span class="rating"><i class="bi bi-star-fill"></i> 4.7</span>
-                      <span class="price">from $980</span>
-                    </div>
-                    <a href="pages/destinations.html" class="quick-link">View Details <i
-                        class="bi bi-chevron-right"></i></a>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-12" data-aos="fade-left" data-aos-delay="500">
-                <div class="compact-destination">
-                  <div class="destination-image">
-                    <img src="assets/img/travel/destination-16.webp" alt="Safari Experience" class="img-fluid">
-                    <div class="badge-offer limited">Limited Spots</div>
-                  </div>
-                  <div class="destination-details">
-                    <h4>Safari Experience</h4>
-                    <p class="location"><i class="bi bi-geo-alt"></i> Kenya</p>
-                    <p class="brief">Witness the Big Five and experience the great migration in Africa's most
-                      spectacular wildlife reserves.</p>
-                    <div class="stats-row">
-                      <span class="tour-count"><i class="bi bi-calendar-check"></i> 11 Safaris</span>
-                      <span class="rating"><i class="bi bi-star-fill"></i> 4.9</span>
-                      <span class="price">from $2,750</span>
-                    </div>
-                    <a href="pages/destinations.html" class="quick-link">View Details <i
-                        class="bi bi-chevron-right"></i></a>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
+        <div class="row" id="featured-destinations-list">
+          <!-- Dynamic content will be loaded here -->
         </div>
 
       </div>
@@ -408,6 +307,7 @@
 
   <!-- Main JS File -->
   <script src="js/main.js"></script>
+  <script type="module" src="src/controllers/ToursController.js"></script>
 
 </body>
 

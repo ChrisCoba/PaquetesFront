@@ -3,10 +3,20 @@ import { PaquetesService } from '../services/PaquetesService.js';
 export const ToursController = {
     init: async () => {
         const toursContainer = document.getElementById('tours-list');
+        const featuredContainer = document.getElementById('featured-destinations-list');
         const filterForm = document.querySelector('.tour-filters');
+        const destinationSelect = document.getElementById('destination');
 
         if (toursContainer) {
             await ToursController.loadTours();
+        }
+
+        if (featuredContainer) {
+            await ToursController.loadFeaturedTours();
+        }
+
+        if (destinationSelect) {
+            await ToursController.loadDestinations();
         }
 
         if (filterForm) {
@@ -65,6 +75,76 @@ export const ToursController = {
         });
     },
 
+    loadFeaturedTours: async () => {
+        const container = document.getElementById('featured-destinations-list');
+        if (!container) return;
+
+        container.innerHTML = '<div class="col-12 text-center"><div class="spinner-border" role="status"></div></div>';
+
+        try {
+            const tours = await PaquetesService.search({});
+            // Take first 4 items as featured
+            const featuredTours = tours.slice(0, 4);
+            ToursController.renderFeaturedTours(featuredTours, container);
+        } catch (error) {
+            console.error('Failed to load featured tours:', error);
+            container.innerHTML = '<div class="col-12"><div class="alert alert-danger">Failed to load featured tours.</div></div>';
+        }
+    },
+
+    renderFeaturedTours: (tours, container) => {
+        container.innerHTML = '';
+        if (!tours || tours.length === 0) {
+            container.innerHTML = '<div class="col-12 text-center"><p>No featured tours available.</p></div>';
+            return;
+        }
+
+        tours.forEach(tour => {
+            const cardHtml = `
+                <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="position-relative">
+                            <img src="${tour.imagenUrl || 'assets/img/travel/tour-1.webp'}" class="card-img-top rounded-top" alt="${tour.nombre}" style="height: 200px; object-fit: cover;">
+                            <div class="position-absolute top-0 end-0 m-2 badge bg-primary">$${tour.precioActual}</div>
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-truncate">${tour.nombre}</h5>
+                            <p class="card-text small text-muted mb-2"><i class="bi bi-geo-alt-fill text-danger"></i> ${tour.ciudad}, ${tour.pais}</p>
+                            <p class="card-text text-truncate small">${tour.descripcion || `Experience ${tour.ciudad}`}</p>
+                            <a href="pages/tours.html" class="btn btn-sm btn-outline-primary w-100 mt-2">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHtml);
+        });
+    },
+
+    loadDestinations: async () => {
+        const select = document.getElementById('destination');
+        if (!select) return;
+
+        try {
+            const tours = await PaquetesService.search({});
+            // Extract unique cities
+            const cities = [...new Set(tours.map(tour => tour.ciudad))].sort();
+
+            // Clear existing options except the first one
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+
+            cities.forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                select.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Failed to load destinations:', error);
+        }
+    },
+
     handleFilterChange: () => {
         // Collect values from filters
         // Note: You'll need to ensure your HTML select IDs match these or update the selector logic
@@ -94,8 +174,8 @@ export const ToursController = {
 
 // Auto-initialize if we are on the page
 document.addEventListener('DOMContentLoaded', () => {
-    // Check if we are on the tours page by looking for the container
-    if (document.getElementById('tours-list')) {
+    // Check if we are on a page that needs the controller
+    if (document.getElementById('tours-list') || document.getElementById('featured-destinations-list') || document.getElementById('destination')) {
         ToursController.init();
     }
 });
