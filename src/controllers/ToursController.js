@@ -15,7 +15,7 @@ export const ToursController = {
             await ToursController.loadFeaturedTours();
         }
 
-        if (destinationSelect) {
+        if (destinationSelect || document.getElementById('filter-destination')) {
             await ToursController.loadDestinations();
         }
 
@@ -121,24 +121,30 @@ export const ToursController = {
     },
 
     loadDestinations: async () => {
-        const select = document.getElementById('destination');
-        if (!select) return;
+        const selects = [
+            document.getElementById('destination'),
+            document.getElementById('filter-destination')
+        ].filter(el => el !== null);
+
+        if (selects.length === 0) return;
 
         try {
             const tours = await PaquetesService.search({});
             // Extract unique cities
             const cities = [...new Set(tours.map(tour => tour.Ciudad))].sort();
 
-            // Clear existing options except the first one
-            while (select.options.length > 1) {
-                select.remove(1);
-            }
+            selects.forEach(select => {
+                // Clear existing options except the first one
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
 
-            cities.forEach(city => {
-                const option = document.createElement('option');
-                option.value = city;
-                option.textContent = city;
-                select.appendChild(option);
+                cities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    select.appendChild(option);
+                });
             });
         } catch (error) {
             console.error('Failed to load destinations:', error);
@@ -147,10 +153,14 @@ export const ToursController = {
 
     handleFilterChange: () => {
         // Collect values from filters
-        // Note: You'll need to ensure your HTML select IDs match these or update the selector logic
-        const destination = document.querySelector('select[aria-label="Select Destination"]')?.value || '';
-        const type = document.querySelector('select[aria-label="Tour Type"]')?.value || '';
-        const priceRange = document.querySelector('select[aria-label="Price Range"]')?.value || '';
+        const destination = document.getElementById('filter-destination')?.value ||
+            document.querySelector('select[aria-label="Select Destination"]')?.value || '';
+
+        const type = document.getElementById('filter-type')?.value ||
+            document.querySelector('select[aria-label="Tour Type"]')?.value || '';
+
+        const priceRange = document.getElementById('filter-price')?.value ||
+            document.querySelector('select[aria-label="Price Range"]')?.value || '';
 
         // Parse price range if needed, e.g., "0-500"
         let precioMax = null;
