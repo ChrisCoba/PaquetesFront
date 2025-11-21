@@ -21,6 +21,7 @@ export const CartService = {
 
         cart.push(newItem);
         localStorage.setItem(CartService.STORAGE_KEY, JSON.stringify(cart));
+        if (window.updateCartBadge) window.updateCartBadge();
         return cart;
     },
 
@@ -29,12 +30,14 @@ export const CartService = {
         if (index >= 0 && index < cart.length) {
             cart.splice(index, 1);
             localStorage.setItem(CartService.STORAGE_KEY, JSON.stringify(cart));
+            if (window.updateCartBadge) window.updateCartBadge();
         }
         return cart;
     },
 
     clearCart: () => {
         localStorage.removeItem(CartService.STORAGE_KEY);
+        if (window.updateCartBadge) window.updateCartBadge();
     },
 
     calculateTotal: () => {

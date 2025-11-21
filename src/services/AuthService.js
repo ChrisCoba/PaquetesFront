@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './config';
+import { API_BASE_URL } from './config.js';
 
 export const AuthService = {
     /**
@@ -6,58 +6,76 @@ export const AuthService = {
      * @param {Object} credentials - { email, password }
      */
     async login(credentials) {
-        const response = await fetch(`${API_BASE_URL}/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(credentials),
-        });
-        if (!response.ok) throw new Error('Login failed');
-        // Note: API might return just 200 OK or a token. Adjust based on actual response if needed.
-        // If it returns JSON, parse it. If just status, return true.
-        // Assuming JSON for now based on typical patterns, but the spec said "200 Login exitoso" without explicit content.
-        // Let's return the response object or text if JSON fails.
         try {
-            return await response.json();
-        } catch (e) {
-            return { success: true };
+            const response = await fetch(`${API_BASE_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(credentials),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Login failed');
+            }
+
+            const user = await response.json();
+            // Save user session
+            localStorage.setItem('user', JSON.stringify(user));
+            return user;
+        } catch (error) {
+            console.error('Login error:', error);
+            throw error;
         }
     },
 
     /**
-     * Register a new internal user
+     * Register a new user
      * @param {Object} data - { email, password, nombre, apellido, claveAdmin }
      */
     async register(data) {
-        const response = await fetch(`${API_BASE_URL}/usuarios`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
-        if (!response.ok) throw new Error('Registration failed');
         try {
+            const response = await fetch(`${API_BASE_URL}/usuarios`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Registration failed');
+            }
+
             return await response.json();
-        } catch (e) {
-            return { success: true };
+        } catch (error) {
+            console.error('Registration error:', error);
+            throw error;
         }
     },
 
     /**
-     * Register a new external user
-     * @param {Object} data - { bookingUserId, nombre, apellido, correo }
+     * Logout user
      */
-    async registerExternal(data) {
-        const response = await fetch(`${API_BASE_URL}/usuarios/externo`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(data),
-        });
-        if (!response.ok) throw new Error('External registration failed');
-        return response.json();
+    logout() {
+        localStorage.removeItem('user');
+        window.location.href = '../index.html';
+    },
+
+    /**
+     * Get current user
+     */
+    getCurrentUser() {
+        const userStr = localStorage.getItem('user');
+        return userStr ? JSON.parse(userStr) : null;
+    },
+
+    /**
+     * Check if user is authenticated
+     */
+    isAuthenticated() {
+        return !!this.getCurrentUser();
     }
 };

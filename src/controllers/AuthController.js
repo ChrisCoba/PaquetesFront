@@ -2,49 +2,50 @@ import { AuthService } from '../services/AuthService.js';
 
 export const AuthController = {
     init: () => {
-        const loginForm = document.querySelector('form[action="login"]'); // Adjust selector based on HTML
-        const registerForm = document.querySelector('form[action="register"]'); // Adjust selector based on HTML
+        AuthController.setupEventListeners();
+        AuthController.updateUI();
+    },
 
-        // Fallback selectors if action attribute isn't set
-        const genericForms = document.querySelectorAll('.booking-form form');
-
-        if (window.location.pathname.includes('login.html')) {
-            const form = loginForm || genericForms[0];
-            if (form) {
-                form.addEventListener('submit', AuthController.handleLogin);
-            }
+    setupEventListeners: () => {
+        // Login Form
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', AuthController.handleLogin);
         }
 
-        if (window.location.pathname.includes('register.html')) {
-            const form = registerForm || genericForms[0];
-            if (form) {
-                form.addEventListener('submit', AuthController.handleRegister);
-            }
+        // Register Form
+        const registerForm = document.getElementById('register-form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', AuthController.handleRegister);
         }
+
+        // Logout Button (delegation or direct if exists)
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#logout-btn')) {
+                e.preventDefault();
+                AuthService.logout();
+            }
+        });
     },
 
     handleLogin: async (e) => {
         e.preventDefault();
         const form = e.target;
-        const email = form.querySelector('input[type="email"]').value;
-        const password = form.querySelector('input[type="password"]').value;
+        const email = document.getElementById('correo').value;
+        const password = document.getElementById('contrasena').value;
         const submitBtn = form.querySelector('button[type="submit"]');
 
         try {
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Logging in...';
+            submitBtn.textContent = 'Iniciando sesión...';
 
-            const response = await AuthService.login({ email, password });
+            await AuthService.login({ email, password });
 
-            // Store user info/token
-            // Assuming response might contain user info or just success
-            localStorage.setItem('user', JSON.stringify({ email, ...response }));
-
-            alert('Login successful!');
+            alert('¡Bienvenido!');
             window.location.href = '../index.html';
         } catch (error) {
             console.error(error);
-            alert('Login failed: ' + error.message);
+            alert('Error al iniciar sesión: ' + error.message);
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Ingresar';
@@ -54,54 +55,72 @@ export const AuthController = {
     handleRegister: async (e) => {
         e.preventDefault();
         const form = e.target;
-        // Assuming register form has these fields. Adjust based on actual HTML.
-        const nombre = form.querySelector('input[name="nombre"]')?.value || 'User';
-        const apellido = form.querySelector('input[name="apellido"]')?.value || 'Name';
-        const correo = form.querySelector('input[type="email"]').value;
-        // External registration usually doesn't take password in this API spec? 
-        // Spec says: UsuarioExternoRequest: bookingUserId, nombre, apellido, correo
-        // But usually register forms have password. 
-        // If this is for "CrearUsuario" (internal), it needs password.
-        // Let's assume it's creating an external user for booking for now, or we might need to clarify.
-        // However, standard register usually implies creating an account with password.
-        // The API has /usuarios (internal) and /usuarios/externo.
-        // Let's try to use the internal one if there is a password field, otherwise external.
 
-        const passwordInput = form.querySelector('input[type="password"]');
+        const nombre = document.getElementById('nombres').value;
+        const apellido = document.getElementById('apellidos').value;
+        const email = document.getElementById('correo').value;
+        const password = document.getElementById('contrasena').value;
+
+        const submitBtn = form.querySelector('button[type="submit"]');
 
         try {
-            const submitBtn = form.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Registering...';
+            submitBtn.textContent = 'Registrando...';
 
-            if (passwordInput) {
-                // Internal user registration
-                await AuthService.register({
-                    email: correo,
-                    password: passwordInput.value,
-                    nombre,
-                    apellido,
-                    claveAdmin: '' // Default empty
-                });
-            } else {
-                // External user (just for booking?)
-                await AuthService.registerExternal({
-                    bookingUserId: crypto.randomUUID(), // Generate a ID
-                    nombre,
-                    apellido,
-                    correo
-                });
-            }
+            await AuthService.register({
+                email,
+                password,
+                nombre,
+                apellido,
+                claveAdmin: '' // Optional
+            });
 
-            alert('Registration successful! Please login.');
+            alert('¡Registro exitoso! Por favor inicia sesión.');
             window.location.href = 'login.html';
         } catch (error) {
             console.error(error);
-            alert('Registration failed: ' + error.message);
+            alert('Error en el registro: ' + error.message);
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Registrarse';
+        }
+    },
+
+    updateUI: () => {
+        const user = AuthService.getCurrentUser();
+        const navMenu = document.querySelector('#navmenu ul');
+
+        if (!navMenu) return;
+
+        // Remove existing auth links to prevent duplicates if called multiple times
+        const authLinks = navMenu.querySelectorAll('.auth-link');
+        authLinks.forEach(link => link.remove());
+
+        if (user) {
+            // User is logged in
+            const profileHtml = `
+                <li class="dropdown auth-link"><a href="#"><span>Hola, ${user.Nombre}</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+                    <ul>
+                        <li><a href="#">Mi Perfil</a></li>
+                        <li><a href="#" id="logout-btn">Cerrar Sesión</a></li>
+                    </ul>
+                </li>
+            `;
+            navMenu.insertAdjacentHTML('beforeend', profileHtml);
+
+            // Hide "Iniciar Sesión" link if it exists in the static HTML
+            const loginLink = Array.from(navMenu.querySelectorAll('a')).find(a => a.textContent.includes('Iniciar Sesión'));
+            if (loginLink) loginLink.parentElement.style.display = 'none';
+
+        } else {
+            // User is logged out
+            const loginLink = Array.from(navMenu.querySelectorAll('a')).find(a => a.textContent.includes('Iniciar Sesión'));
+            if (loginLink) loginLink.parentElement.style.display = 'block';
         }
     }
 };
 
+// Initialize on load
 document.addEventListener('DOMContentLoaded', () => {
     AuthController.init();
 });
