@@ -95,17 +95,52 @@ export const ToursController = {
                         <div class="tour-content">
                             <h4>${tour.Nombre}</h4>
                             <p>${tour.Descripcion || `Experience ${tour.Ciudad}, ${tour.Pais}`}</p>
-                            <div class="tour-details">
+                            <div class="tour-details mb-3">
                                 <span><i class="bi bi-clock"></i> ${tour.Duracion} Days</span>
                                 <span><i class="bi bi-geo-alt"></i> ${tour.Ciudad}</span>
                             </div>
-                            <a href="#" class="btn btn-outline-primary w-100 mt-3" onclick="window.location.href='tour-details.html?id=${tour.IdPaquete}'">View Details</a>
+                            
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label class="form-label small mb-1">Adultos</label>
+                                        <select class="form-select form-select-sm" id="adults-${tour.IdPaquete}">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4+</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <label class="form-label small mb-1">Niños</label>
+                                        <select class="form-select form-select-sm" id="children-${tour.IdPaquete}">
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3+</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button class="btn btn-primary w-100" onclick="ToursController.addToCart('${tour.IdPaquete}')">
+                                <i class="bi bi-cart-plus"></i> Reservar
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
             container.insertAdjacentHTML('beforeend', cardHtml);
         });
+    },
+
+    addToCart: (tourId) => {
+        const adults = document.getElementById(`adults-${tourId}`).value;
+        const children = document.getElementById(`children-${tourId}`).value;
+        console.log(`Adding to cart: Tour ${tourId}, Adults: ${adults}, Children: ${children}`);
+        alert(`Reservado! Tour ID: ${tourId}, Adultos: ${adults}, Niños: ${children}`);
     },
 
     loadFeaturedTours: async () => {
@@ -230,3 +265,6 @@ document.addEventListener('DOMContentLoaded', () => {
         ToursController.init();
     }
 });
+
+// Expose controller to window for inline event handlers
+window.ToursController = ToursController;
