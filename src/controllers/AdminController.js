@@ -16,10 +16,25 @@ export const AdminController = {
                 AdminController.switchView(viewId);
             });
         });
+
+        const backButton = document.querySelector('.btn-back-to-dashboard');
+        if (backButton) {
+            backButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('management-views-container').style.display = 'none';
+                document.getElementById('dashboard-view').style.display = 'block';
+            });
+        }
     },
 
     switchView: (viewId) => {
-        // Hide all views
+        // Hide dashboard
+        document.getElementById('dashboard-view').style.display = 'none';
+
+        // Show management container
+        document.getElementById('management-views-container').style.display = 'block';
+
+        // Hide all specific views
         document.querySelectorAll('.management-view').forEach(view => {
             view.style.display = 'none';
         });
