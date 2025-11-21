@@ -1,10 +1,10 @@
-import { config } from './config.js';
+import { API_BASE_URL } from './config.js';
 
 export const AdminService = {
     // Users
     getUsers: async () => {
         try {
-            const response = await fetch(`${config.API_BASE_URL}/usuarios/list`);
+            const response = await fetch(`${API_BASE_URL}/usuarios/list`);
             if (!response.ok) throw new Error('Error al obtener usuarios');
             return await response.json();
         } catch (error) {
@@ -15,7 +15,7 @@ export const AdminService = {
 
     createUser: async (userData) => {
         try {
-            const response = await fetch(`${config.API_BASE_URL}/usuarios`, {
+            const response = await fetch(`${API_BASE_URL}/usuarios`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -35,7 +35,7 @@ export const AdminService = {
     // Tours
     getTours: async () => {
         try {
-            const response = await fetch(`${config.API_BASE_URL}/search`);
+            const response = await fetch(`${API_BASE_URL}/search`);
             if (!response.ok) throw new Error('Error al obtener tours');
             return await response.json();
         } catch (error) {
@@ -46,7 +46,7 @@ export const AdminService = {
 
     createTour: async (tourData) => {
         try {
-            const response = await fetch(`${config.API_BASE_URL}`, {
+            const response = await fetch(`${API_BASE_URL}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
