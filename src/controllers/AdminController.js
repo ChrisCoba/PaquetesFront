@@ -1,145 +1,193 @@
-import { PaquetesService } from '../services/PaquetesService.js';
-import { AuthService } from '../services/AuthService.js';
+import { AdminService } from '../services/AdminService.js';
 
 export const AdminController = {
     init: () => {
-        // Hook into the existing view switching logic if possible, 
-        // or just listen for when views are shown to load data.
+        AdminController.setupNavigation();
+        AdminController.setupForms();
+        // Load default view (e.g., Users) or just wait for user interaction
+    },
 
-        const manageUsersBtn = document.querySelector('[data-view="user-manage-view"]');
-        if (manageUsersBtn) {
-            manageUsersBtn.addEventListener('click', AdminController.loadUsers);
-        }
+    setupNavigation: () => {
+        const navLinks = document.querySelectorAll('[data-view]');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const viewId = link.getAttribute('data-view');
+                AdminController.switchView(viewId);
+            });
+        });
+    },
 
-        const manageToursBtn = document.querySelector('[data-view="tour-manage-view"]');
-        if (manageToursBtn) {
-            manageToursBtn.addEventListener('click', AdminController.loadTours);
-        }
+    switchView: (viewId) => {
+        // Hide all views
+        document.querySelectorAll('.management-view').forEach(view => {
+            view.style.display = 'none';
+        });
 
-        // Handle Create Tour Form
-        const createTourForm = document.querySelector('#tour-create-view form');
-        if (createTourForm) {
-            createTourForm.addEventListener('submit', AdminController.handleCreateTour);
+        // Show selected view
+        const selectedView = document.getElementById(viewId);
+        if (selectedView) {
+            selectedView.style.display = 'block';
+
+            // Load data based on view
+            if (viewId === 'user-manage-view') {
+                AdminController.loadUsers();
+            } else if (viewId === 'tour-manage-view') {
+                AdminController.loadTours();
+            } else if (viewId === 'destination-manage-view') {
+                AdminController.loadDestinations();
+            }
         }
     },
 
+    setupForms: () => {
+        // User Create Form
+        const userForm = document.querySelector('#user-create-view form');
+        if (userForm) {
+            userForm.addEventListener('submit', AdminController.handleCreateUser);
+        }
+
+        // Tour Create Form
+        const tourForm = document.querySelector('#tour-create-view form');
+        if (tourForm) {
+            tourForm.addEventListener('submit', AdminController.handleCreateTour);
+        }
+    },
+
+    // --- Users ---
     loadUsers: async () => {
         const tbody = document.querySelector('#user-manage-view tbody');
-        if (!tbody) return;
-
-        tbody.innerHTML = '<tr><td colspan="4" class="text-center">Loading...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4">Cargando...</td></tr>';
 
         try {
-            // Note: We need to add a list method to AuthService or call API directly
-            // Assuming AuthService.list() exists or we fetch directly
-            // Since we didn't add list() to AuthService in previous step, let's fetch directly here or assume it was added.
-            // I'll use a direct fetch for now to be safe, or better, extend AuthService.
-            // But for this file, I'll assume AuthService.list() is what we want, 
-            // but since I know I didn't write it, I'll use the config base url.
-            // Actually, let's just use the PaquetesService pattern.
-
-            // Temporary direct fetch since AuthService update wasn't requested explicitly in step 2 but needed here.
-            // Ideally I would update AuthService.
-            const response = await fetch('http://localhost/api/v1/integracion/paquetes/usuarios/list');
-            const users = await response.json();
-
+            const users = await AdminService.getUsers();
             tbody.innerHTML = '';
             users.forEach(user => {
-                const tr = `
-                    <tr>
-                        <td>${user.idUsuario || user.id}</td>
-                        <td>${user.nombre} ${user.apellido}</td>
-                        <td>${user.email}</td>
-                        <td>
-                            <button class="btn btn-sm btn-primary">Edit</button>
-                            <button class="btn btn-sm btn-danger">Delete</button>
-                        </td>
-                    </tr>
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.IdUsuario || user.Id}</td>
+                    <td>${user.Nombre} ${user.Apellido}</td>
+                    <td>${user.Email || user.Correo}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info">Editar</button>
+                        <button class="btn btn-sm btn-danger">Eliminar</button>
+                    </td>
                 `;
-                tbody.insertAdjacentHTML('beforeend', tr);
+                tbody.appendChild(tr);
             });
         } catch (error) {
-            console.error('Error loading users:', error);
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Error loading users</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="4" class="text-danger">Error loading users: ${error.message}</td></tr>`;
         }
     },
 
-    loadTours: async () => {
-        // We need a table for tours, the HTML might not have it yet, 
-        // but let's assume there's a #tour-manage-view with a table or we create it.
-        // The current HTML for admin.html didn't show the tour table structure in the snippet, 
-        // but let's assume standard table structure similar to users.
+    handleCreateUser: async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
 
-        // Actually, I should probably inject the table if it's missing or just log for now.
-        // But let's try to find a container.
-        const container = document.getElementById('tour-manage-view');
-        if (!container) return;
-
-        // Simple render for now
-        container.innerHTML = '<h3>Manage Tours</h3><div id="tours-admin-list" class="row">Loading...</div>';
-        const list = container.querySelector('#tours-admin-list');
+        const userData = {
+            Nombre: document.getElementById('userName').value,
+            Apellido: document.getElementById('userSurname').value,
+            Email: document.getElementById('userEmail').value,
+            Password: document.getElementById('userPassword').value,
+            ClaveAdmin: document.getElementById('userAdminKey')?.value || ''
+        };
 
         try {
-            const tours = await PaquetesService.search({});
-            list.innerHTML = '';
+            submitBtn.disabled = true;
+            await AdminService.createUser(userData);
+            alert('Usuario creado exitosamente');
+            form.reset();
+            AdminController.switchView('user-manage-view');
+        } catch (error) {
+            alert('Error al crear usuario: ' + error.message);
+        } finally {
+            submitBtn.disabled = false;
+        }
+    },
+
+    // --- Tours ---
+    loadTours: async () => {
+        const tbody = document.querySelector('#tour-manage-view tbody');
+        tbody.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
+
+        try {
+            const tours = await AdminService.getTours();
+            tbody.innerHTML = '';
             tours.forEach(tour => {
-                const item = `
-                    <div class="col-12 mb-2 p-2 border rounded d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>${tour.nombre}</strong> (${tour.ciudad})
-                        </div>
-                        <div>
-                            <span class="badge bg-success">$${tour.precioActual}</span>
-                            <button class="btn btn-sm btn-danger ms-2" onclick="AdminController.deleteTour('${tour.idPaquete}')">Delete</button>
-                        </div>
-                    </div>
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${tour.IdPaquete}</td>
+                    <td>${tour.Nombre}</td>
+                    <td>${tour.Ciudad}</td>
+                    <td>$${tour.Precio}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info">Editar</button>
+                        <button class="btn btn-sm btn-danger">Eliminar</button>
+                    </td>
                 `;
-                list.insertAdjacentHTML('beforeend', item);
+                tbody.appendChild(tr);
             });
         } catch (error) {
-            list.innerHTML = 'Error loading tours';
+            tbody.innerHTML = `<tr><td colspan="5" class="text-danger">Error loading tours: ${error.message}</td></tr>`;
         }
     },
 
     handleCreateTour: async (e) => {
         e.preventDefault();
         const form = e.target;
+        const submitBtn = form.querySelector('button[type="submit"]');
 
-        const data = {
-            nombre: form.querySelector('#tourName').value,
-            ciudadId: 1, // Hardcoded for now, needs select
-            codigo: 'TOUR-' + Date.now(), // Auto-gen
-            tipoActividad: 'Adventure', // Hardcoded or add field
-            precioBase: parseFloat(form.querySelector('#tourPrice').value),
-            cupoMaximo: 20,
-            duracionDias: 5,
-            imagenUrl: ''
+        const tourData = {
+            Nombre: document.getElementById('tourName').value,
+            Codigo: 'TOUR-' + Math.floor(Math.random() * 10000), // Auto-generate or ask user
+            CiudadId: document.getElementById('tourDestination').value, // Assuming input is City Name for now, backend might need ID
+            TipoActividad: 'General',
+            PrecioBase: parseFloat(document.getElementById('tourPrice').value),
+            CupoMaximo: 20,
+            DuracionDias: 3,
+            ImagenUrl: 'https://via.placeholder.com/300'
         };
 
         try {
-            await PaquetesService.create(data);
-            alert('Tour created successfully!');
+            submitBtn.disabled = true;
+            await AdminService.createTour(tourData);
+            alert('Tour creado exitosamente');
             form.reset();
-            AdminController.loadTours(); // Refresh list
+            AdminController.switchView('tour-manage-view');
         } catch (error) {
-            alert('Error creating tour: ' + error.message);
+            alert('Error al crear tour: ' + error.message);
+        } finally {
+            submitBtn.disabled = false;
         }
     },
 
-    deleteTour: async (id) => {
-        if (confirm('Are you sure?')) {
-            try {
-                await PaquetesService.delete(id);
-                AdminController.loadTours();
-            } catch (error) {
-                alert('Error deleting tour');
-            }
+    // --- Destinations (Derived) ---
+    loadDestinations: async () => {
+        const tbody = document.querySelector('#destination-manage-view tbody');
+        tbody.innerHTML = '<tr><td colspan="2">Cargando...</td></tr>';
+
+        try {
+            const tours = await AdminService.getTours();
+            const cities = [...new Set(tours.map(t => t.Ciudad))];
+
+            tbody.innerHTML = '';
+            cities.forEach((city, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${city}</td>
+                    <td>
+                         <span class="badge bg-secondary">Read Only</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            tbody.innerHTML = `<tr><td colspan="3" class="text-danger">Error loading destinations: ${error.message}</td></tr>`;
         }
     }
 };
-
-// Expose to window for onclick handlers
-window.AdminController = AdminController;
 
 document.addEventListener('DOMContentLoaded', () => {
     AdminController.init();

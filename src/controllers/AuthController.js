@@ -58,8 +58,28 @@ export const AuthController = {
 
         const nombre = document.getElementById('nombres').value;
         const apellido = document.getElementById('apellidos').value;
+        const identificacion = document.getElementById('identificacion').value;
         const email = document.getElementById('correo').value;
         const password = document.getElementById('contrasena').value;
+
+        // Validations
+        // 1. Identificación: Only numbers and 10 digits length
+        if (!/^\d{10}$/.test(identificacion)) {
+            alert('La identificación debe tener exactamente 10 dígitos numéricos.');
+            return;
+        }
+
+        // 2. Correo: Must have one @ and end with .com
+        if (!/^[^@]+@[^@]+\.com$/.test(email)) {
+            alert('El correo debe contener un "@" y terminar en ".com".');
+            return;
+        }
+
+        // 3. Contraseña: Minimum 8 characters
+        if (password.length < 8) {
+            alert('La contraseña debe tener al menos 8 caracteres.');
+            return;
+        }
 
         const submitBtn = form.querySelector('button[type="submit"]');
 
@@ -72,7 +92,8 @@ export const AuthController = {
                 password,
                 nombre,
                 apellido,
-                claveAdmin: '' // Optional
+                identificacion, // Sending it even if backend might not use it yet
+                claveAdmin: ''
             });
 
             alert('¡Registro exitoso! Por favor inicia sesión.');
