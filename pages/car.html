@@ -89,35 +89,14 @@
           <div class="col-lg-8">
             <div class="cart-items">
               <h2>Tours Seleccionados</h2>
-              <div class="cart-item d-flex align-items-center justify-content-between">
-                <div class="item-details d-flex align-items-center">
-                  <img src="../assets/img/travel/tour-1.webp" alt="Tour Image" class="item-image">
-                  <div>
-                    <h5>Paris Romance</h5>
-                    <p>5 Days, 4 Nights</p>
-                  </div>
+              <div id="cart-items-container">
+                <!-- Dynamic items will be loaded here -->
+                <div class="text-center py-5">
+                  <div class="spinner-border" role="status"></div>
                 </div>
-                <div class="item-quantity">
-                  <input type="number" value="1" min="1" class="form-control">
-                </div>
-                <div class="item-price">$1,299</div>
-                <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
               </div>
-              <div class="cart-item d-flex align-items-center justify-content-between">
-                <div class="item-details d-flex align-items-center">
-                  <img src="../assets/img/travel/tour-2.webp" alt="Tour Image" class="item-image">
-                  <div>
-                    <h5>Bali Adventure</h5>
-                    <p>7 Days, 6 Nights</p>
-                  </div>
-                </div>
-                <div class="item-quantity">
-                  <input type="number" value="2" min="1" class="form-control">
-                </div>
-                <div class="item-price">$899</div>
-                <button class="btn btn-danger btn-sm"><i class="bi bi-trash"></i></button>
-              </div>
-              <a href="/pages/tours.html" class="btn btn-outline-primary mt-3"><i class="bi bi-plus-circle"></i> Add New
+
+              <a href="tours.html" class="btn btn-outline-primary mt-3"><i class="bi bi-plus-circle"></i> Add New
                 Items</a>
             </div>
           </div>
@@ -126,16 +105,16 @@
               <h4>Payment Summary</h4>
               <div class="summary-item d-flex justify-content-between">
                 <span>Subtotal</span>
-                <span>$3,097</span>
+                <span id="cart-subtotal">$0.00</span>
               </div>
               <div class="summary-item d-flex justify-content-between">
                 <span>Taxes</span>
-                <span>$247.76</span>
+                <span id="cart-taxes">$0.00</span>
               </div>
               <hr>
               <div class="summary-total d-flex justify-content-between">
                 <h5>Total</h5>
-                <h5>$3,344.76</h5>
+                <h5 id="cart-total">$0.00</h5>
               </div>
               <div class="mb-3">
                 <label for="nro-cliente" class="form-label">Nro. Cliente</label>
@@ -221,6 +200,9 @@
 
     <!-- Main JS File -->
     <script src="../js/main.js"></script>
+
+    <!-- Cart Logic -->
+    <script type="module" src="../src/controllers/CartController.js"></script>
 
 </body>
 

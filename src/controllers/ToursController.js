@@ -1,6 +1,9 @@
 import { PaquetesService } from '../services/PaquetesService.js';
+import { CartService } from '../services/CartService.js';
 
 export const ToursController = {
+    tours: [], // Store loaded tours locally
+
     init: async () => {
         const toursContainer = document.getElementById('tours-list');
         const featuredContainer = document.getElementById('featured-destinations-list');
@@ -39,6 +42,7 @@ export const ToursController = {
         try {
             // Fetch all tours first (API doesn't support filtering)
             let tours = await PaquetesService.search({});
+            ToursController.tours = tours; // Save to local property
             console.log('Total tours fetched:', tours.length); // Debug log
 
             // Client-side filtering
@@ -139,8 +143,19 @@ export const ToursController = {
     addToCart: (tourId) => {
         const adults = document.getElementById(`adults-${tourId}`).value;
         const children = document.getElementById(`children-${tourId}`).value;
-        console.log(`Adding to cart: Tour ${tourId}, Adults: ${adults}, Children: ${children}`);
-        alert(`Reservado! Tour ID: ${tourId}, Adultos: ${adults}, Niños: ${children}`);
+
+        // Find the tour object
+        const tour = ToursController.tours.find(t => t.IdPaquete == tourId);
+
+        if (tour) {
+            CartService.addToCart(tour, adults, children);
+            if (confirm(`Added to cart: ${tour.Nombre}\nDo you want to view your cart?`)) {
+                window.location.href = 'car.html';
+            }
+        } else {
+            console.error('Tour not found:', tourId);
+            alert('Error adding to cart. Please try again.');
+        }
     },
 
     loadFeaturedTours: async () => {
