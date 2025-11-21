@@ -32,29 +32,42 @@ export const ToursController = {
         const container = document.getElementById('tours-list');
         if (!container) return;
 
+        console.log('Loading tours with filters:', filters); // Debug log
+
         container.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
 
         try {
             // Fetch all tours first (API doesn't support filtering)
             let tours = await PaquetesService.search({});
+            console.log('Total tours fetched:', tours.length); // Debug log
 
             // Client-side filtering
             if (filters.city) {
+                console.log('Filtering by city:', filters.city); // Debug log
                 tours = tours.filter(tour => tour.Ciudad === filters.city);
             }
 
             if (filters.precioMax) {
-                tours = tours.filter(tour => tour.PrecioActual <= parseFloat(filters.precioMax));
+                const maxPrice = parseFloat(filters.precioMax);
+                console.log('Filtering by max price:', maxPrice); // Debug log
+                tours = tours.filter(tour => {
+                    const price = parseFloat(tour.PrecioActual);
+                    return !isNaN(price) && price <= maxPrice;
+                });
             }
 
             if (filters.duration) {
+                console.log('Filtering by duration:', filters.duration); // Debug log
                 const [min, max] = filters.duration.split('-').map(Number);
                 if (!isNaN(min) && !isNaN(max)) {
-                    tours = tours.filter(tour => tour.Duracion >= min && tour.Duracion <= max);
+                    tours = tours.filter(tour => {
+                        const duration = parseInt(tour.Duracion);
+                        return !isNaN(duration) && duration >= min && duration <= max;
+                    });
                 }
             }
 
-            // Note: 'tipoActividad' filtering is skipped as API data doesn't match 'adventure'/'luxury' categories
+            console.log('Filtered tours count:', tours.length); // Debug log
 
             ToursController.renderTours(tours, container);
         } catch (error) {
@@ -185,6 +198,8 @@ export const ToursController = {
         const duration = document.getElementById('filter-duration')?.value ||
             document.querySelector('select[aria-label="Duration"]')?.value || '';
 
+        console.log('Raw filter values:', { destination, type, priceRange, duration }); // Debug log
+
         // Parse price range if needed, e.g., "0-500"
         let precioMax = null;
         if (priceRange) {
@@ -201,6 +216,8 @@ export const ToursController = {
 
         // Remove empty keys
         Object.keys(filters).forEach(key => filters[key] === '' && delete filters[key]);
+
+        console.log('Active filters:', filters); // Debug log
 
         ToursController.loadTours(filters);
     }
