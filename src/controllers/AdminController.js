@@ -51,6 +51,10 @@ export const AdminController = {
                 AdminController.loadTours();
             } else if (viewId === 'destination-manage-view') {
                 AdminController.loadDestinations();
+            } else if (viewId === 'reservation-manage-view') {
+                AdminController.loadReservations();
+            } else if (viewId === 'payment-view-view') {
+                AdminController.loadInvoices();
             }
         }
     },
@@ -137,12 +141,29 @@ export const AdminController = {
                     <td>${tour.Ciudad}</td>
                     <td>$${tour.Precio}</td>
                     <td>
-                        <button class="btn btn-sm btn-info">Editar</button>
-                        <button class="btn btn-sm btn-danger">Eliminar</button>
+                        <button class="btn btn-sm btn-info" onclick="alert('Editar tour en desarrollo')">Editar</button>
+                        <button class="btn btn-sm btn-danger btn-delete-tour" data-id="${tour.IdPaquete}">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
+
+            // Add event listeners for delete buttons
+            document.querySelectorAll('.btn-delete-tour').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    if (confirm('¿Está seguro de eliminar este tour?')) {
+                        const id = e.target.getAttribute('data-id');
+                        try {
+                            await AdminService.deleteTour(id);
+                            alert('Tour eliminado');
+                            AdminController.loadTours();
+                        } catch (error) {
+                            alert('Error al eliminar tour: ' + error.message);
+                        }
+                    }
+                });
+            });
+
         } catch (error) {
             tbody.innerHTML = `<tr><td colspan="5" class="text-danger">Error loading tours: ${error.message}</td></tr>`;
         }
@@ -200,6 +221,77 @@ export const AdminController = {
             });
         } catch (error) {
             tbody.innerHTML = `<tr><td colspan="3" class="text-danger">Error loading destinations: ${error.message}</td></tr>`;
+        }
+    },
+
+    // --- Reservations ---
+    loadReservations: async () => {
+        const tbody = document.querySelector('#reservation-manage-view tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6">Cargando...</td></tr>';
+
+        try {
+            const reservations = await AdminService.getReservations();
+            tbody.innerHTML = '';
+            reservations.forEach(res => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${res.IdReserva}</td>
+                    <td>${res.NombreContacto}</td>
+                    <td>${new Date(res.FechaViaje).toLocaleDateString()}</td>
+                    <td>${res.Estado}</td>
+                    <td>$${res.MontoTotal}</td>
+                    <td>
+                        ${res.Estado !== 'Cancelada' ? `<button class="btn btn-sm btn-danger btn-cancel-res" data-id="${res.IdReserva}">Cancelar</button>` : ''}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            // Add event listeners for cancel buttons
+            document.querySelectorAll('.btn-cancel-res').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const reason = prompt('Ingrese el motivo de la cancelación:');
+                    if (reason) {
+                        const id = e.target.getAttribute('data-id');
+                        try {
+                            await AdminService.cancelReservation(id, reason);
+                            alert('Reserva cancelada');
+                            AdminController.loadReservations();
+                        } catch (error) {
+                            alert('Error al cancelar reserva: ' + error.message);
+                        }
+                    }
+                });
+            });
+
+        } catch (error) {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Error loading reservations: ${error.message}</td></tr>`;
+        }
+    },
+
+    // --- Payments (Invoices) ---
+    loadInvoices: async () => {
+        const tbody = document.querySelector('#payment-view-view tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
+
+        try {
+            const invoices = await AdminService.getInvoices();
+            tbody.innerHTML = '';
+            invoices.forEach(inv => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${inv.IdFactura}</td>
+                    <td>${inv.ReservaId}</td>
+                    <td>${new Date(inv.FechaEmision).toLocaleDateString()}</td>
+                    <td>$${inv.Total}</td>
+                    <td><span class="badge bg-success">Pagado</span></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-danger">Error loading invoices: ${error.message}</td></tr>`;
         }
     }
 };

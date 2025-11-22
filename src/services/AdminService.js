@@ -61,5 +61,101 @@ export const AdminService = {
             console.error('AdminService.createTour error:', error);
             throw error;
         }
+    },
+
+    updateTour: async (id, tourData) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(tourData)
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error al actualizar tour');
+            return data;
+        } catch (error) {
+            console.error('AdminService.updateTour error:', error);
+            throw error;
+        }
+    },
+
+    deleteTour: async (id) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/${id}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error al eliminar tour');
+            return data;
+        } catch (error) {
+            console.error('AdminService.deleteTour error:', error);
+            throw error;
+        }
+    },
+
+    // Reservations
+    getReservations: async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/reservas`);
+            if (!response.ok) throw new Error('Error al obtener reservas');
+            return await response.json();
+        } catch (error) {
+            console.error('AdminService.getReservations error:', error);
+            throw error;
+        }
+    },
+
+    updateReservation: async (id, reservationData) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/reservas/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(reservationData)
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error al actualizar reserva');
+            return data;
+        } catch (error) {
+            console.error('AdminService.updateReservation error:', error);
+            throw error;
+        }
+    },
+
+    cancelReservation: async (id, reason) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/reservas/${id}/cancelar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ Motivo: reason })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error al cancelar reserva');
+            return data;
+        } catch (error) {
+            console.error('AdminService.cancelReservation error:', error);
+            throw error;
+        }
+    },
+
+    // Payments (Facturas)
+    getInvoices: async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/invoices/list`);
+            if (!response.ok) throw new Error('Error al obtener facturas');
+            return await response.json();
+        } catch (error) {
+            console.error('AdminService.getInvoices error:', error);
+            throw error;
+        }
     }
 };

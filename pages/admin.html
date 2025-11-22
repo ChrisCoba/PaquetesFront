@@ -201,7 +201,7 @@
                   <div class="card-body">
                     <h5 class="card-title"><i class="bi bi-eye-fill me-2"></i>Ver Pagos</h5>
                     <p class="card-text">Ver el historial de todas las transacciones.</p>
-                    <button class="btn btn-secondary" disabled>Próximamente</button>
+                    <a href="#" class="btn btn-primary" data-view="payment-view-view">Ver</a>
                   </div>
                 </div>
               </div>
@@ -320,6 +320,47 @@
               </thead>
               <tbody>
                 <!-- Destination rows will be populated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Manage Reservations View -->
+          <div id="reservation-manage-view" class="management-view" style="display: none;">
+            <h3>Administrar Reservas</h3>
+            <p>Ver y gestionar reservas.</p>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Contacto</th>
+                  <th>Fecha Viaje</th>
+                  <th>Estado</th>
+                  <th>Total</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Reservation rows will be populated by JavaScript -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- View Payments View -->
+          <div id="payment-view-view" class="management-view" style="display: none;">
+            <h3>Historial de Pagos</h3>
+            <p>Lista de facturas emitidas.</p>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ID Factura</th>
+                  <th>ID Reserva</th>
+                  <th>Fecha Emisión</th>
+                  <th>Total</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- Payment rows will be populated by JavaScript -->
               </tbody>
             </table>
           </div>
