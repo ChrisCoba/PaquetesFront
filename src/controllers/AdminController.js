@@ -237,10 +237,10 @@ export const AdminController = {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${res.IdReserva}</td>
-                    <td>${res.NombreContacto}</td>
-                    <td>${new Date(res.FechaViaje).toLocaleDateString()}</td>
-                    <td>${res.Estado}</td>
-                    <td>$${res.MontoTotal}</td>
+                    <td>${res.ClienteNombre}</td>
+                    <td>${new Date(res.FechaCreacion).toLocaleDateString()}</td>
+                    <td>${res.Estado || 'Pendiente'}</td>
+                    <td>$${res.Total}</td>
                     <td>
                         ${res.Estado !== 'Cancelada' ? `<button class="btn btn-sm btn-danger btn-cancel-res" data-id="${res.IdReserva}">Cancelar</button>` : ''}
                     </td>
