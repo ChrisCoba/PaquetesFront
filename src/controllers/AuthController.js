@@ -239,7 +239,7 @@ export const AuthController = {
             const profileHtml = `
                 <li class="dropdown auth-link"><a href="#"><span>Hola, ${user.Nombre}</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                     <ul>
-                        <li><a href="#">Mi Perfil</a></li>
+                        <li><a href="user.html">Mi Perfil</a></li>
                         <li><a href="#" id="logout-btn">Cerrar Sesión</a></li>
                     </ul>
                 </li>
