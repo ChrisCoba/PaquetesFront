@@ -1,10 +1,16 @@
 import { CartService } from '../services/CartService.js';
+import { API_BASE_URL } from '../services/config.js';
 
 export const CartController = {
     init: () => {
         const cartContainer = document.getElementById('cart-items-container');
         if (cartContainer) {
             CartController.renderCart();
+        }
+
+        const checkoutBtn = document.getElementById('btn-checkout');
+        if (checkoutBtn) {
+            checkoutBtn.addEventListener('click', CartController.handleCheckout);
         }
     },
 
@@ -17,7 +23,7 @@ export const CartController = {
         container.innerHTML = '';
 
         if (cart.length === 0) {
-            container.innerHTML = '<div class="text-center py-5"><p>Your cart is empty.</p><a href="tours.html" class="btn btn-primary">Browse Tours</a></div>';
+            container.innerHTML = '<div class="text-center py-5"><p>Tu carrito está vacío.</p><a href="tours.html" class="btn btn-primary">Ver Tours</a></div>';
             CartController.updateSummary();
             return;
         }
@@ -31,10 +37,10 @@ export const CartController = {
                         <img src="${item.image || '../assets/img/travel/tour-1.webp'}" alt="${item.name}" class="item-image rounded" style="width: 80px; height: 60px; object-fit: cover; margin-right: 15px;">
                         <div>
                             <h5 class="mb-0">${item.name}</h5>
-                            <small class="text-muted">${item.duration} Days</small>
+                            <small class="text-muted">${item.duration} Días</small>
                             <div class="small">
-                                <span>Adults: ${item.adults}</span> | 
-                                <span>Children: ${item.children}</span>
+                                <span>Adultos: ${item.adults}</span> | 
+                                <span>Niños: ${item.children}</span>
                             </div>
                         </div>
                     </div>
@@ -51,7 +57,7 @@ export const CartController = {
     },
 
     removeItem: (index) => {
-        if (confirm('Are you sure you want to remove this item?')) {
+        if (confirm('¿Estás seguro de eliminar este ítem?')) {
             CartService.removeFromCart(index);
             CartController.renderCart();
         }
@@ -67,6 +73,110 @@ export const CartController = {
         if (subtotalEl) subtotalEl.textContent = `$${totals.subtotal}`;
         if (taxesEl) taxesEl.textContent = `$${totals.taxes}`;
         if (totalEl) totalEl.textContent = `$${totals.total}`;
+    },
+
+    handleCheckout: async () => {
+        const userId = document.getElementById('nro-cliente').value;
+        const accountNum = document.getElementById('nro-cuenta').value;
+
+        if (!userId || !accountNum) {
+            alert('Por favor ingrese el Nro. Cliente y Nro. Cuenta');
+            return;
+        }
+
+        const cart = CartService.getCart();
+        if (cart.length === 0) {
+            alert('El carrito está vacío');
+            return;
+        }
+
+        const btn = document.getElementById('btn-checkout');
+        btn.disabled = true;
+        btn.textContent = 'Procesando...';
+
+        let successCount = 0;
+        let errors = [];
+
+        for (const item of cart) {
+            try {
+                // 1. Check Availability
+                const today = new Date().toISOString();
+                const totalPersonas = parseInt(item.adults) + parseInt(item.children);
+
+                const availRes = await fetch(`${API_BASE_URL}/availability`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        IdPaquete: item.tourId,
+                        FechaInicio: today,
+                        Personas: totalPersonas
+                    })
+                });
+
+                if (!availRes.ok) {
+                    const errText = await availRes.text();
+                    throw new Error(`No hay disponibilidad: ${errText}`);
+                }
+
+                // 2. Create Hold
+                const holdRes = await fetch(`${API_BASE_URL}/hold`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        IdPaquete: item.tourId,
+                        BookingUserId: userId,
+                        FechaInicio: today,
+                        Personas: totalPersonas
+                    })
+                });
+
+                if (!holdRes.ok) throw new Error('Error al crear reserva temporal');
+                const holdData = await holdRes.json();
+
+                // 3. Book (Create Reservation & Invoice)
+                const bookRes = await fetch(`${API_BASE_URL}/book`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        IdPaquete: item.tourId,
+                        HoldId: holdData.HoldId,
+                        BookingUserId: userId,
+                        MetodoPago: "CreditCard", // Placeholder
+                        Turistas: [{
+                            Nombre: "Cliente",
+                            Apellido: userId,
+                            Identificacion: userId,
+                            TipoIdentificacion: "DNI"
+                        }]
+                    })
+                });
+
+                if (!bookRes.ok) throw new Error('Error al confirmar reserva');
+                const bookData = await bookRes.json();
+
+                successCount++;
+
+            } catch (error) {
+                console.error(error);
+                errors.push(`Tour ${item.name}: ${error.message}`);
+            }
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'Proceder al Pago';
+
+        if (successCount > 0) {
+            let msg = `¡Pago exitoso! Se procesaron ${successCount} reservas.`;
+            if (errors.length > 0) msg += `\n\nHubo algunos errores:\n${errors.join('\n')}`;
+
+            alert(msg);
+            CartService.clearCart();
+            CartController.renderCart();
+
+            // Optional: Redirect to a success page or show invoice details
+        } else {
+            alert('Error al procesar el pago:\n' + errors.join('\n'));
+        }
     }
 };
 

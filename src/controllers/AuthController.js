@@ -4,6 +4,7 @@ export const AuthController = {
     init: () => {
         AuthController.setupEventListeners();
         AuthController.updateUI();
+        AuthController.setupRealTimeValidation();
     },
 
     setupEventListeners: () => {
@@ -26,6 +27,131 @@ export const AuthController = {
                 AuthService.logout();
             }
         });
+    },
+
+    setupRealTimeValidation: () => {
+        const identificacionInput = document.getElementById('identificacion');
+        const correoInput = document.getElementById('correo');
+        const contrasenaInput = document.getElementById('contrasena');
+
+        if (identificacionInput) {
+            // Restrict input to numbers only and max 10 digits
+            identificacionInput.addEventListener('input', (e) => {
+                // Remove any non-numeric characters
+                e.target.value = e.target.value.replace(/\D/g, '');
+
+                // Limit to 10 digits
+                if (e.target.value.length > 10) {
+                    e.target.value = e.target.value.slice(0, 10);
+                }
+
+                AuthController.validateIdentificacion();
+            });
+
+            identificacionInput.addEventListener('blur', AuthController.validateIdentificacion);
+        }
+
+        if (correoInput) {
+            correoInput.addEventListener('input', AuthController.validateCorreo);
+            correoInput.addEventListener('blur', AuthController.validateCorreo);
+        }
+
+        if (contrasenaInput) {
+            contrasenaInput.addEventListener('input', AuthController.validateContrasena);
+            contrasenaInput.addEventListener('blur', AuthController.validateContrasena);
+        }
+    },
+
+    validateIdentificacion: () => {
+        const input = document.getElementById('identificacion');
+        const feedback = document.getElementById('identificacion-feedback');
+
+        if (!input || !feedback) return true;
+
+        const value = input.value;
+
+        if (value.length === 0) {
+            input.classList.remove('is-invalid', 'is-valid');
+            feedback.style.display = 'none';
+            return false;
+        }
+
+        if (!/^\d+$/.test(value)) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            feedback.textContent = 'Solo se permiten números.';
+            feedback.style.display = 'block';
+            return false;
+        }
+
+        if (value.length !== 10) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            feedback.textContent = `La identificación debe tener exactamente 10 dígitos (${value.length}/10).`;
+            feedback.style.display = 'block';
+            return false;
+        }
+
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        feedback.style.display = 'none';
+        return true;
+    },
+
+    validateCorreo: () => {
+        const input = document.getElementById('correo');
+        const feedback = document.getElementById('correo-feedback');
+
+        if (!input || !feedback) return true;
+
+        const value = input.value;
+
+        if (value.length === 0) {
+            input.classList.remove('is-invalid', 'is-valid');
+            feedback.style.display = 'none';
+            return false;
+        }
+
+        if (!/^[^@]+@[^@]+\.com$/.test(value)) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            feedback.textContent = 'El correo debe contener un "@" y terminar en ".com".';
+            feedback.style.display = 'block';
+            return false;
+        }
+
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        feedback.style.display = 'none';
+        return true;
+    },
+
+    validateContrasena: () => {
+        const input = document.getElementById('contrasena');
+        const feedback = document.getElementById('contrasena-feedback');
+
+        if (!input || !feedback) return true;
+
+        const value = input.value;
+
+        if (value.length === 0) {
+            input.classList.remove('is-invalid', 'is-valid');
+            feedback.style.display = 'none';
+            return false;
+        }
+
+        if (value.length < 8) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            feedback.textContent = `La contraseña debe tener al menos 8 caracteres (${value.length}/8).`;
+            feedback.style.display = 'block';
+            return false;
+        }
+
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        feedback.style.display = 'none';
+        return true;
     },
 
     handleLogin: async (e) => {
@@ -62,22 +188,13 @@ export const AuthController = {
         const email = document.getElementById('correo').value;
         const password = document.getElementById('contrasena').value;
 
-        // Validations
-        // 1. Identificación: Only numbers and 10 digits length
-        if (!/^\d{10}$/.test(identificacion)) {
-            alert('La identificación debe tener exactamente 10 dígitos numéricos.');
-            return;
-        }
+        // Run all validations
+        const isIdentificacionValid = AuthController.validateIdentificacion();
+        const isCorreoValid = AuthController.validateCorreo();
+        const isContrasenaValid = AuthController.validateContrasena();
 
-        // 2. Correo: Must have one @ and end with .com
-        if (!/^[^@]+@[^@]+\.com$/.test(email)) {
-            alert('El correo debe contener un "@" y terminar en ".com".');
-            return;
-        }
-
-        // 3. Contraseña: Minimum 8 characters
-        if (password.length < 8) {
-            alert('La contraseña debe tener al menos 8 caracteres.');
+        if (!isIdentificacionValid || !isCorreoValid || !isContrasenaValid) {
+            alert('Por favor corrige los errores en el formulario antes de continuar.');
             return;
         }
 
@@ -92,7 +209,7 @@ export const AuthController = {
                 password,
                 nombre,
                 apellido,
-                identificacion, // Sending it even if backend might not use it yet
+                identificacion,
                 claveAdmin: ''
             });
 

@@ -118,15 +118,19 @@
                   </div>
                   <div class="form-group mb-3">
                     <label for="identificacion">Identificación</label>
-                    <input type="text" name="identificacion" id="identificacion" class="form-control" required="">
+                    <input type="text" name="identificacion" id="identificacion" class="form-control" required=""
+                      maxlength="10" pattern="[0-9]*" inputmode="numeric">
+                    <div id="identificacion-feedback" class="invalid-feedback" style="display: none;"></div>
                   </div>
                   <div class="form-group mb-3">
                     <label for="correo">Correo</label>
                     <input type="email" name="correo" id="correo" class="form-control" required="">
+                    <div id="correo-feedback" class="invalid-feedback" style="display: none;"></div>
                   </div>
                   <div class="form-group mb-3">
                     <label for="contrasena">Contraseña</label>
                     <input type="password" name="contrasena" id="contrasena" class="form-control" required="">
+                    <div id="contrasena-feedback" class="invalid-feedback" style="display: none;"></div>
                   </div>
                   <button type="submit" class="btn btn-primary w-100">Registrarse</button>
                 </form>
