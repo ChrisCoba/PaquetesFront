@@ -285,24 +285,57 @@
           <div id="tour-create-view" class="management-view" style="display: none;">
             <h3>Crear Nuevo Tour</h3>
             <p>Llena el formulario a continuación para agregar un nuevo tour.</p>
-            <form>
-              <div class="mb-3">
-                <label for="tourName" class="form-label">Nombre del Tour</label>
-                <input type="text" class="form-control" id="tourName" autocomplete="off" required>
+            <form id="tour-form">
+              <input type="hidden" id="tourId"> <!-- Hidden ID for Edit mode -->
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="tourName" class="form-label">Nombre</label>
+                  <input type="text" class="form-control" id="tourName" autocomplete="off" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="tourCode" class="form-label">Código</label>
+                  <input type="text" class="form-control" id="tourCode" autocomplete="off" required>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="tourCityId" class="form-label">ID Ciudad</label>
+                  <input type="number" class="form-control" id="tourCityId" autocomplete="off" required>
+                  <small class="text-muted">Ingrese el ID numérico de la ciudad.</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="tourActivityType" class="form-label">Tipo Actividad</label>
+                  <select class="form-select" id="tourActivityType">
+                    <option value="Aire Libre">Aire Libre</option>
+                    <option value="Interiores">Interiores</option>
+                    <option value="General">General</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label for="tourPrice" class="form-label">Precio Base</label>
+                  <input type="number" class="form-control" id="tourPrice" step="0.01" autocomplete="off" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="tourCapacity" class="form-label">Cupo Máximo</label>
+                  <input type="number" class="form-control" id="tourCapacity" autocomplete="off" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                  <label for="tourDuration" class="form-label">Duración (Días)</label>
+                  <input type="number" class="form-control" id="tourDuration" autocomplete="off" required>
+                </div>
               </div>
               <div class="mb-3">
-                <label for="tourDestination" class="form-label">Destino</label>
-                <input type="text" class="form-control" id="tourDestination" autocomplete="off" required>
+                <label for="tourImageUrl" class="form-label">URL Imagen</label>
+                <input type="url" class="form-control" id="tourImageUrl" autocomplete="off"
+                  placeholder="https://example.com/image.jpg">
               </div>
-              <div class="mb-3">
-                <label for="tourDescription" class="form-label">Descripción</label>
-                <textarea class="form-control" id="tourDescription" rows="3" autocomplete="off"></textarea>
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary" id="btn-save-tour">Guardar Tour</button>
+                <button type="button" class="btn btn-secondary" id="btn-cancel-tour" style="display: none;">Cancelar
+                  Edición</button>
               </div>
-              <div class="mb-3">
-                <label for="tourPrice" class="form-label">Precio</label>
-                <input type="number" class="form-control" id="tourPrice" autocomplete="off" required>
-              </div>
-              <button type="submit" class="btn btn-primary">Crear Tour</button>
             </form>
           </div>
 

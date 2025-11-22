@@ -69,7 +69,7 @@ export const AdminController = {
         // Tour Create Form
         const tourForm = document.querySelector('#tour-create-view form');
         if (tourForm) {
-            tourForm.addEventListener('submit', AdminController.handleCreateTour);
+            tourForm.addEventListener('submit', AdminController.handleSaveTour);
         }
     },
 
@@ -141,26 +141,22 @@ export const AdminController = {
                     <td>${tour.Ciudad}</td>
                     <td>$${tour.PrecioActual}</td>
                     <td>
-                        <button class="btn btn-sm btn-info" onclick="alert('Editar tour en desarrollo')">Editar</button>
+                        <button class="btn btn-sm btn-info btn-edit-tour" data-id="${tour.IdPaquete}">Editar</button>
                         <button class="btn btn-sm btn-danger btn-delete-tour" data-id="${tour.IdPaquete}">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
 
-            // Add event listeners for delete buttons
+            // Add event listeners
             document.querySelectorAll('.btn-delete-tour').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    if (confirm('¿Está seguro de eliminar este tour?')) {
-                        const id = e.target.getAttribute('data-id');
-                        try {
-                            await AdminService.deleteTour(id);
-                            alert('Tour eliminado');
-                            AdminController.loadTours();
-                        } catch (error) {
-                            alert('Error al eliminar tour: ' + error.message);
-                        }
-                    }
+                btn.addEventListener('click', AdminController.handleDeleteTour);
+            });
+            document.querySelectorAll('.btn-edit-tour').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.getAttribute('data-id');
+                    const tour = tours.find(t => t.IdPaquete == id);
+                    AdminController.handleEditTour(tour);
                 });
             });
 
@@ -169,32 +165,87 @@ export const AdminController = {
         }
     },
 
-    handleCreateTour: async (e) => {
+    handleEditTour: (tour) => {
+        // Switch to create view
+        AdminController.switchView('tour-create-view');
+
+        // Populate form
+        document.getElementById('tourId').value = tour.IdPaquete;
+        document.getElementById('tourName').value = tour.Nombre;
+        document.getElementById('tourCode').value = ''; // Not available in GET response, user must re-enter or we assume
+        document.getElementById('tourCityId').value = ''; // Not available in GET response
+        document.getElementById('tourActivityType').value = tour.TipoActividad;
+        document.getElementById('tourPrice').value = tour.PrecioActual;
+        document.getElementById('tourCapacity').value = tour.Capacidad;
+        document.getElementById('tourDuration').value = tour.Duracion;
+        document.getElementById('tourImageUrl').value = tour.ImagenUrl;
+
+        // Update UI for Edit mode
+        document.querySelector('#tour-create-view h3').textContent = 'Editar Tour';
+        document.getElementById('btn-save-tour').textContent = 'Actualizar Tour';
+        document.getElementById('btn-cancel-tour').style.display = 'inline-block';
+
+        // Add cancel listener
+        document.getElementById('btn-cancel-tour').onclick = () => {
+            AdminController.resetTourForm();
+            AdminController.switchView('tour-manage-view');
+        };
+    },
+
+    resetTourForm: () => {
+        document.getElementById('tour-form').reset();
+        document.getElementById('tourId').value = '';
+        document.querySelector('#tour-create-view h3').textContent = 'Crear Nuevo Tour';
+        document.getElementById('btn-save-tour').textContent = 'Crear Tour';
+        document.getElementById('btn-cancel-tour').style.display = 'none';
+    },
+
+    handleSaveTour: async (e) => {
         e.preventDefault();
-        const form = e.target;
-        const submitBtn = form.querySelector('button[type="submit"]');
+        const submitBtn = document.getElementById('btn-save-tour');
+        const id = document.getElementById('tourId').value;
 
         const tourData = {
             Nombre: document.getElementById('tourName').value,
-            Codigo: 'TOUR-' + Math.floor(Math.random() * 10000), // Auto-generate or ask user
-            CiudadId: document.getElementById('tourDestination').value, // Assuming input is City Name for now, backend might need ID
-            TipoActividad: 'General',
+            Codigo: document.getElementById('tourCode').value,
+            CiudadId: parseInt(document.getElementById('tourCityId').value),
+            TipoActividad: document.getElementById('tourActivityType').value,
             PrecioBase: parseFloat(document.getElementById('tourPrice').value),
-            CupoMaximo: 20,
-            DuracionDias: 3,
-            ImagenUrl: 'https://via.placeholder.com/300'
+            CupoMaximo: parseInt(document.getElementById('tourCapacity').value),
+            DuracionDias: parseInt(document.getElementById('tourDuration').value),
+            ImagenUrl: document.getElementById('tourImageUrl').value
         };
 
         try {
             submitBtn.disabled = true;
-            await AdminService.createTour(tourData);
-            alert('Tour creado exitosamente');
-            form.reset();
+            if (id) {
+                // Update
+                await AdminService.updateTour(id, tourData);
+                alert('Tour actualizado exitosamente');
+            } else {
+                // Create
+                await AdminService.createTour(tourData);
+                alert('Tour creado exitosamente');
+            }
+            AdminController.resetTourForm();
             AdminController.switchView('tour-manage-view');
         } catch (error) {
-            alert('Error al crear tour: ' + error.message);
+            alert('Error al guardar tour: ' + error.message);
         } finally {
             submitBtn.disabled = false;
+        }
+    },
+
+    handleDeleteTour: async (e) => {
+        if (confirm('¿Está seguro de eliminar este tour?')) {
+            const id = e.target.getAttribute('data-id');
+            try {
+                await AdminService.deleteTour(id);
+                alert('Tour eliminado');
+                AdminController.loadTours();
+            } catch (error) {
+                alert('Error al eliminar tour: ' + error.message);
+            }
         }
     },
 
