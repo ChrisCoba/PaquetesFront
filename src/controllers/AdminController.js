@@ -128,7 +128,7 @@ export const AdminController = {
     // --- Tours ---
     loadTours: async () => {
         const tbody = document.querySelector('#tour-manage-view tbody');
-        tbody.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="9">Cargando...</td></tr>';
 
         try {
             const tours = await AdminService.getTours();
@@ -139,6 +139,10 @@ export const AdminController = {
                     <td>${tour.IdPaquete}</td>
                     <td>${tour.Nombre}</td>
                     <td>${tour.Ciudad}</td>
+                    <td>${tour.Pais || '-'}</td>
+                    <td>${tour.TipoActividad}</td>
+                    <td>${tour.Capacidad}</td>
+                    <td>${tour.Duracion}</td>
                     <td>$${tour.PrecioActual}</td>
                     <td>
                         <button class="btn btn-sm btn-info btn-edit-tour" data-id="${tour.IdPaquete}">Editar</button>
