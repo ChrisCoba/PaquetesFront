@@ -139,7 +139,7 @@ export const AdminController = {
                     <td>${tour.IdPaquete}</td>
                     <td>${tour.Nombre}</td>
                     <td>${tour.Ciudad}</td>
-                    <td>$${tour.Precio}</td>
+                    <td>$${tour.PrecioActual}</td>
                     <td>
                         <button class="btn btn-sm btn-info" onclick="alert('Editar tour en desarrollo')">Editar</button>
                         <button class="btn btn-sm btn-danger btn-delete-tour" data-id="${tour.IdPaquete}">Eliminar</button>

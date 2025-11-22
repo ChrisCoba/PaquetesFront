@@ -230,23 +230,23 @@
             <form>
               <div class="mb-3">
                 <label for="userName" class="form-label">Nombre</label>
-                <input type="text" class="form-control" id="userName" required>
+                <input type="text" class="form-control" id="userName" autocomplete="given-name" required>
               </div>
               <div class="mb-3">
                 <label for="userSurname" class="form-label">Apellido</label>
-                <input type="text" class="form-control" id="userSurname" required>
+                <input type="text" class="form-control" id="userSurname" autocomplete="family-name" required>
               </div>
               <div class="mb-3">
                 <label for="userEmail" class="form-label">Correo</label>
-                <input type="email" class="form-control" id="userEmail" required>
+                <input type="email" class="form-control" id="userEmail" autocomplete="email" required>
               </div>
               <div class="mb-3">
                 <label for="userPassword" class="form-label">Contraseña</label>
-                <input type="password" class="form-control" id="userPassword" required>
+                <input type="password" class="form-control" id="userPassword" autocomplete="new-password" required>
               </div>
               <div class="mb-3">
                 <label for="userAdminKey" class="form-label">Clave Admin (Opcional)</label>
-                <input type="password" class="form-control" id="userAdminKey">
+                <input type="password" class="form-control" id="userAdminKey" autocomplete="off">
               </div>
               <button type="submit" class="btn btn-primary">Crear Usuario</button>
             </form>
@@ -288,19 +288,19 @@
             <form>
               <div class="mb-3">
                 <label for="tourName" class="form-label">Nombre del Tour</label>
-                <input type="text" class="form-control" id="tourName" required>
+                <input type="text" class="form-control" id="tourName" autocomplete="off" required>
               </div>
               <div class="mb-3">
                 <label for="tourDestination" class="form-label">Destino</label>
-                <input type="text" class="form-control" id="tourDestination" required>
+                <input type="text" class="form-control" id="tourDestination" autocomplete="off" required>
               </div>
               <div class="mb-3">
                 <label for="tourDescription" class="form-label">Descripción</label>
-                <textarea class="form-control" id="tourDescription" rows="3"></textarea>
+                <textarea class="form-control" id="tourDescription" rows="3" autocomplete="off"></textarea>
               </div>
               <div class="mb-3">
                 <label for="tourPrice" class="form-label">Precio</label>
-                <input type="number" class="form-control" id="tourPrice" required>
+                <input type="number" class="form-control" id="tourPrice" autocomplete="off" required>
               </div>
               <button type="submit" class="btn btn-primary">Crear Tour</button>
             </form>
