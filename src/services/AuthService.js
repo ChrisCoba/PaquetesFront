@@ -36,12 +36,21 @@ export const AuthService = {
      */
     async register(data) {
         try {
+            // Transform data to match backend expectations (capitalized field names)
+            const payload = {
+                Email: data.email,
+                Password: data.password,
+                Nombre: data.nombre,
+                Apellido: data.apellido,
+                ClaveAdmin: data.claveAdmin || ''
+            };
+
             const response = await fetch(`${API_BASE_URL}/usuarios`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) {
