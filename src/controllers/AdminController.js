@@ -1,7 +1,27 @@
 import { AdminService } from '../services/AdminService.js';
+import { AuthService } from '../services/AuthService.js';
 
 export const AdminController = {
     init: () => {
+        // Check if user is authenticated
+        const user = AuthService.getCurrentUser();
+
+        if (!user) {
+            // Not logged in, redirect to login page
+            alert('Debes iniciar sesión para acceder al panel de administración.');
+            window.location.href = 'login.html';
+            return;
+        }
+
+        // Check if user is admin
+        if (user.Email !== 'admin@agencia.local') {
+            // Not an admin, redirect to home page
+            alert('No tienes permisos para acceder a esta página.');
+            window.location.href = '../index.html';
+            return;
+        }
+
+        // User is authenticated and is admin, proceed
         AdminController.setupNavigation();
         AdminController.setupForms();
         // Load default view (e.g., Users) or just wait for user interaction

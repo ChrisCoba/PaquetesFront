@@ -12,6 +12,8 @@ export const UserController = {
         }
 
         UserController.loadUserProfile();
+        UserController.loadUserReservations();
+        UserController.loadUserInvoices();
         UserController.setupEventListeners();
     },
 
@@ -100,6 +102,91 @@ export const UserController = {
             submitBtn.disabled = false;
             submitBtn.textContent = 'Guardar Cambios';
         }
+    },
+
+    loadUserReservations: async () => {
+        const user = AuthService.getCurrentUser();
+        if (!user) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/reservas`);
+            if (!response.ok) {
+                throw new Error('Error al cargar reservas');
+            }
+
+            const reservas = await response.json();
+
+            // Filter reservations by user email
+            const userReservas = reservas.filter(r => r.ClienteEmail === user.Email);
+
+            UserController.renderReservations(userReservas);
+        } catch (error) {
+            console.error('Error loading reservations:', error);
+            UserController.renderReservations([]);
+        }
+    },
+
+    renderReservations: (reservas) => {
+        const container = document.querySelector('#v-pills-reservations .list-group');
+        if (!container) return;
+
+        if (reservas.length === 0) {
+            container.innerHTML = '<div class="alert alert-info">No tienes reservas aún.</div>';
+            return;
+        }
+
+        container.innerHTML = reservas.map(reserva => `
+            <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Reserva ${reserva.Codigo}</h5>
+                    <small>${new Date(reserva.FechaCreacion).toLocaleDateString('es-ES')}</small>
+                </div>
+                <p class="mb-1"><strong>Total:</strong> $${reserva.Total.toFixed(2)}</p>
+                <p class="mb-1"><strong>Estado:</strong> ${reserva.Estado}</p>
+                <small>ID de Reserva: ${reserva.IdReserva}</small>
+            </div>
+        `).join('');
+    },
+
+    loadUserInvoices: async () => {
+        const user = AuthService.getCurrentUser();
+        if (!user) return;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/invoices/list`);
+            if (!response.ok) {
+                throw new Error('Error al cargar facturas');
+            }
+
+            const facturas = await response.json();
+
+            // Filter invoices by user email (assuming facturas have ClienteEmail)
+            const userFacturas = facturas.filter(f => f.ClienteEmail === user.Email);
+
+            UserController.renderInvoices(userFacturas);
+        } catch (error) {
+            console.error('Error loading invoices:', error);
+            UserController.renderInvoices([]);
+        }
+    },
+
+    renderInvoices: (facturas) => {
+        const tbody = document.querySelector('#v-pills-payments tbody');
+        if (!tbody) return;
+
+        if (facturas.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" class="text-center">No tienes facturas aún.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = facturas.map(factura => `
+            <tr>
+                <td>${new Date(factura.FechaEmision).toLocaleDateString('es-ES')}</td>
+                <td>Factura ${factura.NumeroFactura}</td>
+                <td>$${factura.Total.toFixed(2)}</td>
+                <td><span class="badge bg-success">Pagado</span></td>
+            </tr>
+        `).join('');
     }
 };
 
