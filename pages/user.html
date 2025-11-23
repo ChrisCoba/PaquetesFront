@@ -101,102 +101,61 @@
               <a class="nav-link" id="v-pills-payments-tab" data-bs-toggle="pill" href="#v-pills-payments" role="tab"
                 aria-controls="v-pills-payments" aria-selected="false">Payment History</a>
             </div>
-          </div>
-          <div class="col-lg-9">
-            <div class="tab-content" id="v-pills-tabContent">
-              <!-- Profile Settings Tab -->
-              <div class="tab-pane fade show active" id="v-pills-profile" role="tabpanel"
-                aria-labelledby="v-pills-profile-tab">
-                <h3>Profile Settings</h3>
-                <form>
-                  <div class="mb-3">
-                    <label for="fullName" class="form-label">Full Name</label>
-                    <input type="text" class="form-control" id="fullName" value="John Doe">
-                  </div>
-                  <div class="mb-3">
-                    <label for="email" class="form-label">Email address</label>
-                    <input type="email" class="form-control" id="email" value="john.doe@example.com">
-                  </div>
-                  <button type="submit" class="btn btn-primary">Update Profile</button>
-                </form>
 
-                <hr class="my-4">
-
-                <h3>Change Password</h3>
-                <form>
-                  <div class="mb-3">
-                    <label for="currentPassword" class="form-label">Current Password</label>
-                    <input type="password" class="form-control" id="currentPassword">
-                  </div>
-                  <div class="mb-3">
-                    <label for="newPassword" class="form-label">New Password</label>
-                    <input type="password" class="form-control" id="newPassword">
-                  </div>
-                  <div class="mb-3">
-                    <label for="confirmPassword" class="form-label">Confirm New Password</label>
-                    <input type="password" class="form-control" id="confirmPassword">
-                  </div>
-                  <button type="submit" class="btn btn-primary">Change Password</button>
-                </form>
-              </div>
-
-              <!-- My Reservations Tab -->
-              <div class="tab-pane fade" id="v-pills-reservations" role="tabpanel"
-                aria-labelledby="v-pills-reservations-tab">
-                <h3>My Reservations</h3>
-                <div class="list-group">
-                  <div class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                      <h5 class="mb-1">Paris Romance Tour</h5>
-                      <small>3 days ago</small>
-                    </div>
-                    <p class="mb-1"><strong>Date:</strong> 2025-12-15 - 2025-12-20</p>
-                    <p class="mb-1"><strong>Status:</strong> Confirmed</p>
-                    <small>Reservation ID: #12345</small>
-                  </div>
-                  <div class="list-group-item">
-                    <div class="d-flex w-100 justify-content-between">
-                      <h5 class="mb-1">Bali Adventure</h5>
-                      <small>1 week ago</small>
-                    </div>
-                    <p class="mb-1"><strong>Date:</strong> 2026-01-20 - 2026-01-27</p>
-                    <p class="mb-1"><strong>Status:</strong> Pending</p>
-                    <small>Reservation ID: #12346</small>
-                  </div>
+            <h3>My Reservations</h3>
+            <div class="list-group">
+              <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                  <h5 class="mb-1">Paris Romance Tour</h5>
+                  <small>3 days ago</small>
                 </div>
+                <p class="mb-1"><strong>Date:</strong> 2025-12-15 - 2025-12-20</p>
+                <p class="mb-1"><strong>Status:</strong> Confirmed</p>
+                <small>Reservation ID: #12345</small>
               </div>
-
-              <!-- Payment History Tab -->
-              <div class="tab-pane fade" id="v-pills-payments" role="tabpanel" aria-labelledby="v-pills-payments-tab">
-                <h3>Payment History</h3>
-                <table class="table">
-                  <thead>
-                    <tr>
-                      <th scope="col">Date</th>
-                      <th scope="col">Description</th>
-                      <th scope="col">Amount</th>
-                      <th scope="col">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>2025-11-10</td>
-                      <td>Paris Romance Tour</td>
-                      <td>$1,299.00</td>
-                      <td><span class="badge bg-success">Paid</span></td>
-                    </tr>
-                    <tr>
-                      <td>2025-11-06</td>
-                      <td>Bali Adventure (Deposit)</td>
-                      <td>$200.00</td>
-                      <td><span class="badge bg-success">Paid</span></td>
-                    </tr>
-                  </tbody>
-                </table>
+              <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                  <h5 class="mb-1">Bali Adventure</h5>
+                  <small>1 week ago</small>
+                </div>
+                <p class="mb-1"><strong>Date:</strong> 2026-01-20 - 2026-01-27</p>
+                <p class="mb-1"><strong>Status:</strong> Pending</p>
+                <small>Reservation ID: #12346</small>
               </div>
             </div>
           </div>
+
+          <!-- Payment History Tab -->
+          <div class="tab-pane fade" id="v-pills-payments" role="tabpanel" aria-labelledby="v-pills-payments-tab">
+            <h3>Payment History</h3>
+            <table class="table">
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>2025-11-10</td>
+                  <td>Paris Romance Tour</td>
+                  <td>$1,299.00</td>
+                  <td><span class="badge bg-success">Paid</span></td>
+                </tr>
+                <tr>
+                  <td>2025-11-06</td>
+                  <td>Bali Adventure (Deposit)</td>
+                  <td>$200.00</td>
+                  <td><span class="badge bg-success">Paid</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
+      </div>
+      </div>
 
       </div>
 
