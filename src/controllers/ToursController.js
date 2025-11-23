@@ -10,8 +10,16 @@ export const ToursController = {
         const filterForm = document.querySelector('.tour-filters');
         const destinationSelect = document.getElementById('destination');
 
+        // Check for URL parameters (search from home page)
+        const urlParams = new URLSearchParams(window.location.search);
+        const destination = urlParams.get('destination');
+        const filters = {};
+        if (destination) {
+            filters.city = destination;
+        }
+
         if (toursContainer) {
-            await ToursController.loadTours();
+            await ToursController.loadTours(filters);
         }
 
         if (featuredContainer) {
@@ -20,6 +28,14 @@ export const ToursController = {
 
         if (destinationSelect || document.getElementById('filter-destination')) {
             await ToursController.loadDestinations();
+
+            // Pre-select destination if present in URL
+            if (destination) {
+                const filterDest = document.getElementById('filter-destination');
+                if (filterDest) {
+                    filterDest.value = destination;
+                }
+            }
         }
 
         if (filterForm) {
