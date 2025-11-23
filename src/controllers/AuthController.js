@@ -239,8 +239,8 @@ export const AuthController = {
             const profileHtml = `
                 <li class="dropdown auth-link"><a href="#"><span>Hola, ${user.Nombre}</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
                     <ul>
-                        <li><a href="user.html">Mi Perfil</a></li>
-                        ${user.Email === 'admin@agencia.local' ? '<li><a href="admin.html">Admin</a></li>' : ''}
+                        <li><a href="${window.location.pathname.includes('/pages/') ? 'user.html' : 'pages/user.html'}">Mi Perfil</a></li>
+                        ${user.Email === 'admin@agencia.local' ? `<li><a href="${window.location.pathname.includes('/pages/') ? 'admin.html' : 'pages/admin.html'}">Admin</a></li>` : ''}
                         <li><a href="#" id="logout-btn">Cerrar Sesión</a></li>
                     </ul>
                 </li>
