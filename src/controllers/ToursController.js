@@ -35,33 +35,26 @@ export const ToursController = {
         const container = document.getElementById('tours-list');
         if (!container) return;
 
-        console.log('Loading tours with filters:', filters); // Debug log
+        console.log('Loading tours with filters:', filters);
 
         container.innerHTML = '<div class="text-center"><div class="spinner-border" role="status"></div></div>';
 
         try {
-            // Fetch all tours first (API doesn't support filtering)
-            let tours = await PaquetesService.search({});
+            // Prepare API params
+            const apiParams = {};
+
+            if (filters.city) apiParams.city = filters.city;
+            if (filters.tipoActividad) apiParams.tipoActividad = filters.tipoActividad;
+            if (filters.precioMax) apiParams.precioMax = filters.precioMax;
+
+            // Fetch filtered tours from API
+            let tours = await PaquetesService.search(apiParams);
             ToursController.tours = tours; // Save to local property
-            console.log('Total tours fetched:', tours.length); // Debug log
+            console.log('Total tours fetched:', tours.length);
 
-            // Client-side filtering
-            if (filters.city) {
-                console.log('Filtering by city:', filters.city); // Debug log
-                tours = tours.filter(tour => tour.Ciudad === filters.city);
-            }
-
-            if (filters.precioMax) {
-                const maxPrice = parseFloat(filters.precioMax);
-                console.log('Filtering by max price:', maxPrice); // Debug log
-                tours = tours.filter(tour => {
-                    const price = parseFloat(tour.PrecioActual);
-                    return !isNaN(price) && price <= maxPrice;
-                });
-            }
-
+            // Client-side filtering for duration (not supported by API yet)
             if (filters.duration) {
-                console.log('Filtering by duration:', filters.duration); // Debug log
+                console.log('Filtering by duration:', filters.duration);
                 const [min, max] = filters.duration.split('-').map(Number);
                 if (!isNaN(min) && !isNaN(max)) {
                     tours = tours.filter(tour => {
@@ -71,7 +64,7 @@ export const ToursController = {
                 }
             }
 
-            console.log('Filtered tours count:', tours.length); // Debug log
+            console.log('Filtered tours count:', tours.length);
 
             ToursController.renderTours(tours, container);
         } catch (error) {
@@ -248,13 +241,19 @@ export const ToursController = {
         const duration = document.getElementById('filter-duration')?.value ||
             document.querySelector('select[aria-label="Duration"]')?.value || '';
 
-        console.log('Raw filter values:', { destination, type, priceRange, duration }); // Debug log
+        console.log('Raw filter values:', { destination, type, priceRange, duration });
 
-        // Parse price range if needed, e.g., "0-500"
+        // Parse price range if needed
         let precioMax = null;
         if (priceRange) {
-            const parts = priceRange.split('-');
-            if (parts.length > 1) precioMax = parts[1];
+            // If value is just a number (e.g. "50"), use it directly
+            // If it's a range (e.g. "0-50"), take the upper bound
+            if (priceRange.includes('-')) {
+                const parts = priceRange.split('-');
+                if (parts.length > 1) precioMax = parts[1];
+            } else {
+                precioMax = priceRange;
+            }
         }
 
         const filters = {
@@ -267,7 +266,7 @@ export const ToursController = {
         // Remove empty keys
         Object.keys(filters).forEach(key => filters[key] === '' && delete filters[key]);
 
-        console.log('Active filters:', filters); // Debug log
+        console.log('Active filters:', filters);
 
         ToursController.loadTours(filters);
     }
