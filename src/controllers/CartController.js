@@ -91,8 +91,8 @@ export const CartController = {
         }
         const user = JSON.parse(userStr);
         // Assuming user object has 'id' or 'email'. The API needs 'BookingUserId'.
-        // Let's use user.id or user.email as fallback.
-        const bookingUserId = user.id || user.email || user.idUsuario;
+        // Check for various case styles
+        const bookingUserId = user.id || user.Id || user.idUsuario || user.IdUsuario || user.email || user.Email;
 
         // 2. Get Payment Details
         const nroCliente = document.getElementById('nro-cliente')?.value;
@@ -122,14 +122,17 @@ export const CartController = {
             for (const item of cart) {
                 const totalPersonas = parseInt(item.adults) + parseInt(item.children);
 
-                // Call Hold API
-                const holdData = await ReservasService.hold({
+                const holdPayload = {
                     IdPaquete: item.tourId,
                     BookingUserId: bookingUserId,
                     FechaInicio: today,
                     Personas: totalPersonas,
-                    DuracionHoldSegundos: 600 // 10 mins
-                });
+                    DuracionHoldSegundos: 600
+                };
+                console.log('Sending Hold Request:', holdPayload);
+
+                // Call Hold API
+                const holdData = await ReservasService.hold(holdPayload);
 
                 if (!holdData || !holdData.HoldId) {
                     throw new Error(`No se pudo reservar el tour: ${item.name}`);
