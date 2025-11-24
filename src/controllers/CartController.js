@@ -76,9 +76,9 @@ export const CartController = {
         const taxesEl = document.getElementById('cart-taxes');
         const totalEl = document.getElementById('cart-total');
 
-        if (subtotalEl) subtotalEl.textContent = `$${totals.subtotal.toFixed(2)}`;
-        if (taxesEl) taxesEl.textContent = `$${totals.taxes.toFixed(2)}`;
-        if (totalEl) totalEl.textContent = `$${totals.total.toFixed(2)}`;
+        if (subtotalEl) subtotalEl.textContent = `$${totals.subtotal}`;
+        if (taxesEl) taxesEl.textContent = `$${totals.taxes}`;
+        if (totalEl) totalEl.textContent = `$${totals.total}`;
     },
 
     handleCheckout: async () => {
