@@ -22,7 +22,7 @@ export const ReservasService = {
      * @param {Object} data - { idPaquete, holdId, bookingUserId, metodoPago, turistas }
      */
     async book(data) {
-        const response = await fetch(`${API_BASE_URL}/book`, {
+        const response = await fetch(`${API_BASE_URL}/reservas`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -1,7 +1,13 @@
 import { CartService } from '../services/CartService.js';
 import { API_BASE_URL } from '../services/config.js';
+import { BancaService } from '../services/BancaService.js';
+import { FacturasService } from '../services/FacturasService.js';
+import { ReservasService } from '../services/ReservasService.js';
 
 export const CartController = {
+    // Agency Account
+    CUENTA_DESTINO: 1787654321,
+
     init: () => {
         const cartContainer = document.getElementById('cart-items-container');
         if (cartContainer) {
@@ -70,16 +76,29 @@ export const CartController = {
         const taxesEl = document.getElementById('cart-taxes');
         const totalEl = document.getElementById('cart-total');
 
-        if (subtotalEl) subtotalEl.textContent = `$${totals.subtotal}`;
-        if (taxesEl) taxesEl.textContent = `$${totals.taxes}`;
-        if (totalEl) totalEl.textContent = `$${totals.total}`;
+        if (subtotalEl) subtotalEl.textContent = `$${totals.subtotal.toFixed(2)}`;
+        if (taxesEl) taxesEl.textContent = `$${totals.taxes.toFixed(2)}`;
+        if (totalEl) totalEl.textContent = `$${totals.total.toFixed(2)}`;
     },
 
     handleCheckout: async () => {
-        const userId = document.getElementById('nro-cliente').value;
-        const accountNum = document.getElementById('nro-cuenta').value;
+        // 1. Check Auth
+        const userStr = localStorage.getItem('user');
+        if (!userStr) {
+            alert('Debes iniciar sesión para realizar el pago.');
+            window.location.href = 'login.html';
+            return;
+        }
+        const user = JSON.parse(userStr);
+        // Assuming user object has 'id' or 'email'. The API needs 'BookingUserId'.
+        // Let's use user.id or user.email as fallback.
+        const bookingUserId = user.id || user.email || user.idUsuario;
 
-        if (!userId || !accountNum) {
+        // 2. Get Payment Details
+        const nroCliente = document.getElementById('nro-cliente')?.value;
+        const nroCuenta = document.getElementById('nro-cuenta')?.value;
+
+        if (!nroCliente || !nroCuenta) {
             alert('Por favor ingrese el Nro. Cliente y Nro. Cuenta');
             return;
         }
@@ -92,90 +111,92 @@ export const CartController = {
 
         const btn = document.getElementById('btn-checkout');
         btn.disabled = true;
-        btn.textContent = 'Procesando...';
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
 
-        let successCount = 0;
-        let errors = [];
+        try {
+            const totals = CartService.calculateTotal();
+            const today = new Date().toISOString();
 
-        for (const item of cart) {
-            try {
-                // 1. Check Availability
-                const today = new Date().toISOString();
+            // 3. Create Holds for all items
+            const holds = [];
+            for (const item of cart) {
                 const totalPersonas = parseInt(item.adults) + parseInt(item.children);
 
-                const availRes = await fetch(`${API_BASE_URL}/availability`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        IdPaquete: item.tourId,
-                        FechaInicio: today,
-                        Personas: totalPersonas
-                    })
+                // Call Hold API
+                const holdData = await ReservasService.hold({
+                    IdPaquete: item.tourId,
+                    BookingUserId: bookingUserId,
+                    FechaInicio: today,
+                    Personas: totalPersonas,
+                    DuracionHoldSegundos: 600 // 10 mins
                 });
 
-                if (!availRes.ok) {
-                    const errText = await availRes.text();
-                    throw new Error(`No hay disponibilidad: ${errText}`);
+                if (!holdData || !holdData.HoldId) {
+                    throw new Error(`No se pudo reservar el tour: ${item.name}`);
                 }
 
-                // 2. Create Hold
-                const holdRes = await fetch(`${API_BASE_URL}/hold`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        IdPaquete: item.tourId,
-                        BookingUserId: userId,
-                        FechaInicio: today,
-                        Personas: totalPersonas
-                    })
-                });
-
-                if (!holdRes.ok) throw new Error('Error al crear reserva temporal');
-                const holdData = await holdRes.json();
-
-                // 3. Book (Create Reservation & Invoice)
-                const bookRes = await fetch(`${API_BASE_URL}/book`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        IdPaquete: item.tourId,
-                        HoldId: holdData.HoldId,
-                        BookingUserId: userId,
-                        MetodoPago: "CreditCard", // Placeholder
-                        Turistas: [{
-                            Nombre: "Cliente",
-                            Apellido: userId,
-                            Identificacion: userId,
-                            TipoIdentificacion: "DNI"
-                        }]
-                    })
-                });
-
-                if (!bookRes.ok) throw new Error('Error al confirmar reserva');
-                const bookData = await bookRes.json();
-
-                successCount++;
-
-            } catch (error) {
-                console.error(error);
-                errors.push(`Tour ${item.name}: ${error.message}`);
+                holds.push({ item, holdId: holdData.HoldId });
             }
-        }
 
-        btn.disabled = false;
-        btn.textContent = 'Proceder al Pago';
+            // 4. Process Payment
+            const paymentResponse = await BancaService.crearTransaccion(
+                parseInt(nroCuenta),
+                CartController.CUENTA_DESTINO,
+                totals.total
+            );
 
-        if (successCount > 0) {
-            let msg = `¡Pago exitoso! Se procesaron ${successCount} reservas.`;
-            if (errors.length > 0) msg += `\n\nHubo algunos errores:\n${errors.join('\n')}`;
+            if (!paymentResponse.exito) {
+                throw new Error(`Pago fallido: ${paymentResponse.mensaje}`);
+            }
 
-            alert(msg);
+            // 5. Confirm Bookings (Create Reservations)
+            const reservations = [];
+            for (const { item, holdId } of holds) {
+                const bookData = await ReservasService.book({
+                    IdPaquete: item.tourId,
+                    HoldId: holdId,
+                    BookingUserId: bookingUserId,
+                    MetodoPago: "Transferencia Bancaria",
+                    Turistas: [{
+                        Nombre: user.nombre || "Cliente",
+                        Apellido: user.apellido || bookingUserId,
+                        Identificacion: nroCliente,
+                        TipoIdentificacion: "CEDULA"
+                    }]
+                });
+                reservations.push(bookData);
+            }
+
+            // 6. Generate Invoice
+            // Use the first reservation ID for the invoice, or a combined reference
+            const mainReservaId = reservations[0]?.idReserva || paymentResponse.transaccion_id;
+
+            let invoiceMsg = "";
+            try {
+                const invoice = await FacturasService.emit({
+                    reservaId: mainReservaId.toString(),
+                    subtotal: totals.subtotal,
+                    iva: totals.taxes,
+                    total: totals.total
+                });
+                invoiceMsg = `\nFactura #${invoice.numero} generada.`;
+            } catch (invErr) {
+                console.error("Invoice error:", invErr);
+                invoiceMsg = "\n(Error generando factura)";
+            }
+
+            // Success
+            alert(`¡Reserva confirmada!\nID Transacción: ${paymentResponse.transaccion_id}${invoiceMsg}`);
+
             CartService.clearCart();
-            CartController.renderCart();
+            window.location.href = '../index.html';
 
-            // Optional: Redirect to a success page or show invoice details
-        } else {
-            alert('Error al procesar el pago:\n' + errors.join('\n'));
+        } catch (error) {
+            console.error(error);
+            alert(`Error: ${error.message}`);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Proceder al Pago';
         }
     }
 };
