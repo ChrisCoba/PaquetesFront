@@ -3,7 +3,7 @@ import { FacturasService } from '../../src/services/FacturasService.js';
 
 export const CartController = {
     // Hardcoded destination account (agency account)
-    CUENTA_DESTINO: 123456789, // Replace with actual agency account number
+    CUENTA_DESTINO: 1787654321,
 
     init: () => {
         CartController.loadCartItems();
