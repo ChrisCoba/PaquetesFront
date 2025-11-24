@@ -129,7 +129,7 @@ export const CartController = {
                     Personas: totalPersonas,
                     DuracionHoldSegundos: 600
                 };
-                console.log('Sending Hold Request:', holdPayload);
+                console.log('Sending Hold Request:', JSON.stringify(holdPayload, null, 2));
 
                 // Call Hold API
                 const holdData = await ReservasService.hold(holdPayload);
