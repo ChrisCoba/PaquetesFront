@@ -56,6 +56,13 @@ export function renderLayout() {
           <li><a href="/pages/destinations.html" id="nav-destinations">Destinos</a></li>
           <li><a href="/pages/tours.html" id="nav-tours">Tours</a></li>
           <li><a href="${loginNavHref}" id="nav-login">${loginNavText}</a></li>
+          ${user ? `
+          <li class="dropdown"><a href="#"><span>Hola, ${user.Nombre || 'Usuario'}</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
+            <ul>
+              <li><a href="/pages/user.html">Mi Perfil</a></li>
+              <li><a href="#" onclick="AuthService.logout(); return false;">Cerrar Sesión</a></li>
+            </ul>
+          </li>` : ''}
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>

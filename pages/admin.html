@@ -196,22 +196,13 @@
             <h3>Administrar Usuarios</h3>
             <p>Aquí puedes ver y gestionar todos los usuarios registrados.</p>
 
-            <!-- User Tabs -->
-            <ul class="nav nav-tabs mb-3" id="userTabs" role="tablist">
-              <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="active-users-tab" data-bs-toggle="tab"
-                  data-bs-target="#active-users" type="button" role="tab" aria-controls="active-users"
-                  aria-selected="true">Usuarios Activos</button>
-              </li>
-              <li class="nav-item" role="presentation">
-                <button class="nav-link" id="inactive-users-tab" data-bs-toggle="tab" data-bs-target="#inactive-users"
-                  type="button" role="tab" aria-controls="inactive-users" aria-selected="false">Usuarios
-                  Inactivos</button>
-              </li>
-            </ul>
-
-            <!-- Search Bar -->
-            <div class="mb-3">
+            <!-- Search and Filter Bar -->
+            <div class="d-flex mb-3 gap-2">
+              <select id="user-status-filter" class="form-select w-auto">
+                <option value="all">Todos</option>
+                <option value="active" selected>Activos</option>
+                <option value="inactive">Inactivos</option>
+              </select>
               <input type="text" id="user-search" class="form-control"
                 placeholder="Buscar usuario por nombre, apellido o email...">
             </div>

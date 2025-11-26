@@ -9,7 +9,7 @@ export const AdminController = {
     currentPage: 1,
     itemsPerPage: 30,
     allUsers: [], // Store all users for client-side pagination
-    currentTab: 'active', // 'active' or 'inactive'
+    statusFilter: 'active', // 'all', 'active', 'inactive'
     searchTerm: '', // Search term
     userToDeleteId: null, // Store ID for deletion confirmation
 
@@ -123,20 +123,11 @@ export const AdminController = {
             confirmDeleteBtn.addEventListener('click', AdminController.handleDeleteUserConfirmed);
         }
 
-        // Tab Switching
-        const activeTab = document.getElementById('active-users-tab');
-        const inactiveTab = document.getElementById('inactive-users-tab');
-
-        if (activeTab) {
-            activeTab.addEventListener('click', () => {
-                AdminController.currentTab = 'active';
-                AdminController.currentPage = 1;
-                AdminController.renderUserTable();
-            });
-        }
-        if (inactiveTab) {
-            inactiveTab.addEventListener('click', () => {
-                AdminController.currentTab = 'inactive';
+        // Status Filter
+        const statusFilter = document.getElementById('user-status-filter');
+        if (statusFilter) {
+            statusFilter.addEventListener('change', (e) => {
+                AdminController.statusFilter = e.target.value;
                 AdminController.currentPage = 1;
                 AdminController.renderUserTable();
             });
@@ -188,7 +179,9 @@ export const AdminController = {
                 isActive = true;
             }
 
-            const matchesTab = AdminController.currentTab === 'active' ? isActive : !isActive;
+            const matchesStatus =
+                AdminController.statusFilter === 'all' ||
+                (AdminController.statusFilter === 'active' ? isActive : !isActive);
 
             // 2. Filter by Search Term
             const matchesSearch = AdminController.searchTerm === '' ||
@@ -196,7 +189,7 @@ export const AdminController = {
                 (user.Apellido && user.Apellido.toLowerCase().includes(AdminController.searchTerm)) ||
                 (user.Email && user.Email.toLowerCase().includes(AdminController.searchTerm));
 
-            return matchesTab && matchesSearch;
+            return matchesStatus && matchesSearch;
         });
 
         const startIndex = (AdminController.currentPage - 1) * AdminController.itemsPerPage;
@@ -258,14 +251,16 @@ export const AdminController = {
                 isActive = true;
             }
 
-            const matchesTab = AdminController.currentTab === 'active' ? isActive : !isActive;
+            const matchesStatus =
+                AdminController.statusFilter === 'all' ||
+                (AdminController.statusFilter === 'active' ? isActive : !isActive);
 
             const matchesSearch = AdminController.searchTerm === '' ||
                 (user.Nombre && user.Nombre.toLowerCase().includes(AdminController.searchTerm)) ||
                 (user.Apellido && user.Apellido.toLowerCase().includes(AdminController.searchTerm)) ||
                 (user.Email && user.Email.toLowerCase().includes(AdminController.searchTerm));
 
-            return matchesTab && matchesSearch;
+            return matchesStatus && matchesSearch;
         });
 
         const totalPages = Math.ceil(filteredUsers.length / AdminController.itemsPerPage);
