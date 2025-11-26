@@ -2,6 +2,12 @@ import { AdminService } from '../services/AdminService.js';
 import { AuthService } from '../services/AuthService.js';
 
 export const AdminController = {
+    // Pagination state
+    currentPage: 1,
+    itemsPerPage: 20,
+    allUsers: [], // Store all users for client-side pagination
+    userToDeleteId: null, // Store ID for deletion confirmation
+
     init: () => {
         // Check if user is authenticated
         const user = AuthService.getCurrentUser();
@@ -91,6 +97,26 @@ export const AdminController = {
         if (tourForm) {
             tourForm.addEventListener('submit', AdminController.handleSaveTour);
         }
+
+        // User Edit Form
+        const userEditForm = document.querySelector('#user-edit-view form');
+        if (userEditForm) {
+            userEditForm.addEventListener('submit', AdminController.handleUpdateUser);
+        }
+
+        // Cancel Edit User
+        const cancelEditBtn = document.querySelector('.btn-cancel-edit');
+        if (cancelEditBtn) {
+            cancelEditBtn.addEventListener('click', () => {
+                AdminController.switchView('user-manage-view');
+            });
+        }
+
+        // Delete Confirmation
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', AdminController.handleDeleteUserConfirmed);
+        }
     },
 
     // --- Users ---
@@ -99,31 +125,173 @@ export const AdminController = {
         tbody.innerHTML = '<tr><td colspan="4">Cargando...</td></tr>';
 
         try {
+            // Fetch all users if not already fetched or force refresh
+            // For simplicity, we fetch every time to get latest data
             const users = await AdminService.getUsers();
-            tbody.innerHTML = '';
-            users.forEach(user => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${user.IdUsuario || user.Id}</td>
-                    <td>${user.Nombre} ${user.Apellido}</td>
-                    <td>${user.Email || user.Correo}</td>
-                    <td>
-                        <button class="btn btn-sm btn-info">Editar</button>
-                        <button class="btn btn-sm btn-danger">Eliminar</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            // Add event listeners for user actions
-            tbody.querySelectorAll('.btn-info').forEach(btn => {
-                btn.addEventListener('click', () => alert('Funcionalidad de editar usuario en desarrollo'));
-            });
-            tbody.querySelectorAll('.btn-danger').forEach(btn => {
-                btn.addEventListener('click', () => alert('Funcionalidad de eliminar usuario en desarrollo'));
-            });
+            AdminController.allUsers = users;
+            AdminController.renderUserTable();
         } catch (error) {
             tbody.innerHTML = `<tr><td colspan="4" class="text-danger">Error loading users: ${error.message}</td></tr>`;
+        }
+    },
+
+    renderUserTable: () => {
+        const tbody = document.querySelector('#user-manage-view tbody');
+        tbody.innerHTML = '';
+
+        const startIndex = (AdminController.currentPage - 1) * AdminController.itemsPerPage;
+        const endIndex = startIndex + AdminController.itemsPerPage;
+        const usersToShow = AdminController.allUsers.slice(startIndex, endIndex);
+
+        if (usersToShow.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4">No hay usuarios registrados.</td></tr>';
+            return;
+        }
+
+        usersToShow.forEach(user => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${user.IdUsuario || user.Id}</td>
+                <td>${user.Nombre} ${user.Apellido}</td>
+                <td>${user.Email || user.Correo}</td>
+                <td>
+                    <button class="btn btn-sm btn-info btn-edit-user" data-id="${user.IdUsuario || user.Id}">Editar</button>
+                    <button class="btn btn-sm btn-danger btn-delete-user" data-id="${user.IdUsuario || user.Id}">Eliminar</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Add event listeners
+        tbody.querySelectorAll('.btn-edit-user').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const user = AdminController.allUsers.find(u => (u.IdUsuario || u.Id) == id);
+                AdminController.handleEditUser(user);
+            });
+        });
+
+        tbody.querySelectorAll('.btn-delete-user').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                AdminController.confirmDeleteUser(id);
+            });
+        });
+
+        AdminController.renderPagination();
+    },
+
+    renderPagination: () => {
+        const paginationContainer = document.getElementById('user-pagination');
+        paginationContainer.innerHTML = '';
+
+        const totalPages = Math.ceil(AdminController.allUsers.length / AdminController.itemsPerPage);
+
+        if (totalPages <= 1) return;
+
+        // Previous
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${AdminController.currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#">Anterior</a>`;
+        prevLi.onclick = (e) => {
+            e.preventDefault();
+            if (AdminController.currentPage > 1) {
+                AdminController.currentPage--;
+                AdminController.renderUserTable();
+            }
+        };
+        paginationContainer.appendChild(prevLi);
+
+        // Page Numbers
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${AdminController.currentPage === i ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.onclick = (e) => {
+                e.preventDefault();
+                AdminController.currentPage = i;
+                AdminController.renderUserTable();
+            };
+            paginationContainer.appendChild(li);
+        }
+
+        // Next
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${AdminController.currentPage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#">Siguiente</a>`;
+        nextLi.onclick = (e) => {
+            e.preventDefault();
+            if (AdminController.currentPage < totalPages) {
+                AdminController.currentPage++;
+                AdminController.renderUserTable();
+            }
+        };
+        paginationContainer.appendChild(nextLi);
+    },
+
+    handleEditUser: (user) => {
+        AdminController.switchView('user-edit-view');
+        document.getElementById('editUserId').value = user.IdUsuario || user.Id;
+        document.getElementById('editUserName').value = user.Nombre;
+        document.getElementById('editUserSurname').value = user.Apellido;
+        document.getElementById('editUserEmail').value = user.Email || user.Correo;
+        document.getElementById('editUserPassword').value = ''; // Reset password field
+    },
+
+    handleUpdateUser: async (e) => {
+        e.preventDefault();
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        const id = document.getElementById('editUserId').value;
+
+        const userData = {
+            Nombre: document.getElementById('editUserName').value,
+            Apellido: document.getElementById('editUserSurname').value,
+            Email: document.getElementById('editUserEmail').value
+        };
+
+        const password = document.getElementById('editUserPassword').value;
+        if (password) {
+            userData.Password = password;
+        }
+
+        try {
+            submitBtn.disabled = true;
+            await AdminService.updateUser(id, userData);
+            alert('Usuario actualizado exitosamente');
+            AdminController.switchView('user-manage-view');
+        } catch (error) {
+            alert('Error al actualizar usuario: ' + error.message);
+        } finally {
+            submitBtn.disabled = false;
+        }
+    },
+
+    confirmDeleteUser: (id) => {
+        AdminController.userToDeleteId = id;
+        const modal = new bootstrap.Modal(document.getElementById('deleteConfirmationModal'));
+        modal.show();
+    },
+
+    handleDeleteUserConfirmed: async () => {
+        if (!AdminController.userToDeleteId) return;
+
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        try {
+            confirmBtn.disabled = true;
+            await AdminService.deleteUser(AdminController.userToDeleteId);
+
+            // Hide modal
+            const modalEl = document.getElementById('deleteConfirmationModal');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+
+            alert('Usuario eliminado (Estado cambiado a INACTIVO)');
+            AdminController.loadUsers(); // Reload list
+        } catch (error) {
+            alert('Error al eliminar usuario: ' + error.message);
+        } finally {
+            confirmBtn.disabled = false;
+            AdminController.userToDeleteId = null;
         }
     },
 

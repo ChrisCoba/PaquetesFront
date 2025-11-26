@@ -32,6 +32,40 @@ export const AdminService = {
         }
     },
 
+    updateUser: async (id, userData) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/usuarios/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(userData)
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error al actualizar usuario');
+            return data;
+        } catch (error) {
+            console.error('AdminService.updateUser error:', error);
+            throw error;
+        }
+    },
+
+    deleteUser: async (id) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/usuarios/${id}`, {
+                method: 'DELETE'
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message || 'Error al eliminar usuario');
+            return data;
+        } catch (error) {
+            console.error('AdminService.deleteUser error:', error);
+            throw error;
+        }
+    },
+
     // Tours
     getTours: async () => {
         try {

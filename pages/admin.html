@@ -207,17 +207,14 @@
               </thead>
               <tbody>
                 <!-- User rows will be populated by JavaScript from an API call -->
-                <tr>
-                  <td>1</td>
-                  <td>John Doe</td>
-                  <td>john.doe@example.com</td>
-                  <td>
-                    <button class="btn btn-sm btn-primary">Edit</button>
-                    <button class="btn btn-sm btn-danger">Delete</button>
-                  </td>
-                </tr>
               </tbody>
             </table>
+            <!-- Pagination Controls -->
+            <nav aria-label="User pagination">
+              <ul class="pagination justify-content-center" id="user-pagination">
+                <!-- Pagination items will be populated by JavaScript -->
+              </ul>
+            </nav>
           </div>
 
           <!-- Create Tour View -->
@@ -366,9 +363,55 @@
             <p>Este es un relleno para la sección de administración seleccionada. El contenido se cargará aquí.</p>
           </div>
 
+          <!-- Edit User View (Hidden by default, shown as modal-like or separate view) -->
+          <div id="user-edit-view" class="management-view" style="display: none;">
+            <h3>Editar Usuario</h3>
+            <form>
+              <input type="hidden" id="editUserId">
+              <div class="mb-3">
+                <label for="editUserName" class="form-label">Nombre</label>
+                <input type="text" class="form-control" id="editUserName" required>
+              </div>
+              <div class="mb-3">
+                <label for="editUserSurname" class="form-label">Apellido</label>
+                <input type="text" class="form-control" id="editUserSurname" required>
+              </div>
+              <div class="mb-3">
+                <label for="editUserEmail" class="form-label">Correo</label>
+                <input type="email" class="form-control" id="editUserEmail" required>
+              </div>
+              <!-- Password field optional for edit -->
+              <div class="mb-3">
+                <label for="editUserPassword" class="form-label">Nueva Contraseña (Dejar en blanco para no
+                  cambiar)</label>
+                <input type="password" class="form-control" id="editUserPassword">
+              </div>
+              <button type="submit" class="btn btn-primary">Actualizar Usuario</button>
+              <button type="button" class="btn btn-secondary btn-cancel-edit">Cancelar</button>
+            </form>
+          </div>
+
         </div>
 
-      </div>
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                Estás seguro de eliminar: pasará a un estado de INACTIVO.
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">NO</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">SI</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
 
     </section><!-- End Admin Dashboard Section -->
 
