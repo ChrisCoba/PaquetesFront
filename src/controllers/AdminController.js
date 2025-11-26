@@ -178,10 +178,14 @@ export const AdminController = {
         const filteredUsers = AdminController.allUsers.filter(user => {
             // 1. Filter by Tab (Active/Inactive)
             let isActive = true;
-            if (user.Activo !== undefined && user.Activo !== null) {
+            // Check for various truthy/falsy values
+            if (user.hasOwnProperty('Activo')) {
                 isActive = user.Activo === true || user.Activo === 1 || user.Activo === 'true';
-            } else if (user.activo !== undefined && user.activo !== null) {
+            } else if (user.hasOwnProperty('activo')) {
                 isActive = user.activo === true || user.activo === 1 || user.activo === 'true';
+            } else {
+                // If neither property exists, assume active (or check deleted_at if available)
+                isActive = true;
             }
 
             const matchesTab = AdminController.currentTab === 'active' ? isActive : !isActive;
@@ -245,10 +249,13 @@ export const AdminController = {
         // Recalculate total pages based on filtered list
         const filteredUsers = AdminController.allUsers.filter(user => {
             let isActive = true;
-            if (user.Activo !== undefined && user.Activo !== null) {
+            // Check for various truthy/falsy values
+            if (user.hasOwnProperty('Activo')) {
                 isActive = user.Activo === true || user.Activo === 1 || user.Activo === 'true';
-            } else if (user.activo !== undefined && user.activo !== null) {
+            } else if (user.hasOwnProperty('activo')) {
                 isActive = user.activo === true || user.activo === 1 || user.activo === 'true';
+            } else {
+                isActive = true;
             }
 
             const matchesTab = AdminController.currentTab === 'active' ? isActive : !isActive;

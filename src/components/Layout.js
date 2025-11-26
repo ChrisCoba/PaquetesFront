@@ -7,9 +7,37 @@ window.AuthService = AuthService;
 export function renderLayout() {
   const user = AuthService.getCurrentUser();
 
+  // User requested "Mi Perfil" instead of "Cerrar Sesión", but typically "Mi Perfil" goes to a profile page.
+  // However, the user's request was "the navmenu show, Iniciar Sesion and it must show Mi Perfil".
+  // And "Cerrar Sesión" was my previous implementation for the button.
+  // I will change the button to "Mi Perfil" (which might just be a logout for now or a link to profile if it existed, but I'll make it logout as per previous logic or maybe just a link).
+  // Wait, "Mi Perfil" usually implies a link to /pages/user.html (which exists in the file list I saw earlier `dist/pages/user.html`).
+  // Let's check if `user.html` exists. Yes, `dist/pages/user.html` was built.
+  // So "Mi Perfil" should link to `/pages/user.html`.
+  // And "Cerrar Sesión" should probably be in the nav menu or inside the profile page.
+  // But the user said "navmenu show, Iniciar Sesion and it must show Mi Perfil".
+  // The navmenu has `<li><a href="/pages/login.html" id="nav-login">Iniciar Sesión</a></li>`.
+  // So I should change THAT link.
+
+  // AND the user said "Also in the admin page...".
+  // But `Layout.js` controls the header for public pages. `admin.html` uses `Layout.js` too (I verified this in Step 732).
+
+  // So:
+  // 1. Update the "Registrarse" button (which I changed to "Cerrar Sesión") -> User didn't explicitly complain about this, but said "Cambios admin y registro a los que estan logeados" in commit message.
+  // The user said "Also in the admin page, the navmenu show, Iniciar Sesion and it must show Mi Perfil".
+  // This refers to the `nav-login` link.
+
+  // Let's handle both:
+  // 1. The "Registrarse" button (btn-getstarted): If logged in, maybe show "Cerrar Sesión" or hide it?
+  // 2. The "Iniciar Sesión" link in nav: Change to "Mi Perfil" pointing to `/pages/user.html`.
+
   const registerLink = user
     ? `<a class="btn-getstarted" href="#" onclick="AuthService.logout(); return false;">Cerrar Sesión</a>`
     : `<a class="btn-getstarted" href="/pages/register.html">Registrarse</a>`;
+
+  // Logic for Nav Menu "Iniciar Sesión" vs "Mi Perfil"
+  const loginNavText = user ? 'Mi Perfil' : 'Iniciar Sesión';
+  const loginNavHref = user ? '/pages/user.html' : '/pages/login.html';
 
   const headerHTML = `
   <header id="header" class="header d-flex align-items-center fixed-top">
@@ -27,7 +55,7 @@ export function renderLayout() {
           <li><a href="/pages/about.html" id="nav-about">Sobre Nosotros</a></li>
           <li><a href="/pages/destinations.html" id="nav-destinations">Destinos</a></li>
           <li><a href="/pages/tours.html" id="nav-tours">Tours</a></li>
-          <li><a href="/pages/login.html" id="nav-login">Iniciar Sesión</a></li>
+          <li><a href="${loginNavHref}" id="nav-login">${loginNavText}</a></li>
         </ul>
         <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
       </nav>
@@ -105,7 +133,7 @@ export function renderLayout() {
     document.getElementById('nav-destinations')?.classList.add('active');
   } else if (path.includes('tours.html')) {
     document.getElementById('nav-tours')?.classList.add('active');
-  } else if (path.includes('login.html')) {
+  } else if (path.includes('login.html') || path.includes('user.html')) {
     document.getElementById('nav-login')?.classList.add('active');
   }
 
