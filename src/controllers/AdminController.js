@@ -4,8 +4,9 @@ import { AuthService } from '../services/AuthService.js';
 export const AdminController = {
     // Pagination state
     currentPage: 1,
-    itemsPerPage: 20,
+    itemsPerPage: 30,
     allUsers: [], // Store all users for client-side pagination
+    currentTab: 'active', // 'active' or 'inactive'
     userToDeleteId: null, // Store ID for deletion confirmation
 
     init: () => {
@@ -117,6 +118,25 @@ export const AdminController = {
         if (confirmDeleteBtn) {
             confirmDeleteBtn.addEventListener('click', AdminController.handleDeleteUserConfirmed);
         }
+
+        // Tab Switching
+        const activeTab = document.getElementById('active-users-tab');
+        const inactiveTab = document.getElementById('inactive-users-tab');
+
+        if (activeTab) {
+            activeTab.addEventListener('click', () => {
+                AdminController.currentTab = 'active';
+                AdminController.currentPage = 1;
+                AdminController.renderUserTable();
+            });
+        }
+        if (inactiveTab) {
+            inactiveTab.addEventListener('click', () => {
+                AdminController.currentTab = 'inactive';
+                AdminController.currentPage = 1;
+                AdminController.renderUserTable();
+            });
+        }
     },
 
     // --- Users ---
@@ -139,9 +159,19 @@ export const AdminController = {
         const tbody = document.querySelector('#user-manage-view tbody');
         tbody.innerHTML = '';
 
+        // Filter users based on current tab
+        const filteredUsers = AdminController.allUsers.filter(user => {
+            const isActive = user.Activo !== undefined ? user.Activo : (user.activo !== undefined ? user.activo : true);
+            if (AdminController.currentTab === 'active') {
+                return isActive === true;
+            } else {
+                return isActive === false;
+            }
+        });
+
         const startIndex = (AdminController.currentPage - 1) * AdminController.itemsPerPage;
         const endIndex = startIndex + AdminController.itemsPerPage;
-        const usersToShow = AdminController.allUsers.slice(startIndex, endIndex);
+        const usersToShow = filteredUsers.slice(startIndex, endIndex);
 
         if (usersToShow.length === 0) {
             tbody.innerHTML = '<tr><td colspan="4">No hay usuarios registrados.</td></tr>';
@@ -185,7 +215,17 @@ export const AdminController = {
         const paginationContainer = document.getElementById('user-pagination');
         paginationContainer.innerHTML = '';
 
-        const totalPages = Math.ceil(AdminController.allUsers.length / AdminController.itemsPerPage);
+        // Recalculate total pages based on filtered list
+        const filteredUsers = AdminController.allUsers.filter(user => {
+            const isActive = user.Activo !== undefined ? user.Activo : (user.activo !== undefined ? user.activo : true);
+            if (AdminController.currentTab === 'active') {
+                return isActive === true;
+            } else {
+                return isActive === false;
+            }
+        });
+
+        const totalPages = Math.ceil(filteredUsers.length / AdminController.itemsPerPage);
 
         if (totalPages <= 1) return;
 

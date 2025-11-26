@@ -195,6 +195,21 @@
           <div id="user-manage-view" class="management-view" style="display: none;">
             <h3>Administrar Usuarios</h3>
             <p>Aquí puedes ver y gestionar todos los usuarios registrados.</p>
+
+            <!-- User Tabs -->
+            <ul class="nav nav-tabs mb-3" id="userTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="active-users-tab" data-bs-toggle="tab"
+                  data-bs-target="#active-users" type="button" role="tab" aria-controls="active-users"
+                  aria-selected="true">Usuarios Activos</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="inactive-users-tab" data-bs-toggle="tab" data-bs-target="#inactive-users"
+                  type="button" role="tab" aria-controls="inactive-users" aria-selected="false">Usuarios
+                  Inactivos</button>
+              </li>
+            </ul>
+
             <!-- Placeholder for user table -->
             <table class="table table-striped">
               <thead>
