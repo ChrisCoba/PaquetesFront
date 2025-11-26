@@ -15,7 +15,13 @@
   }
 
   document.addEventListener('scroll', toggleScrolled);
-  window.addEventListener('load', toggleScrolled);
+  document.addEventListener('scroll', toggleScrolled);
+  // Check if load already fired
+  if (document.readyState === 'complete') {
+    toggleScrolled();
+  } else {
+    window.addEventListener('load', toggleScrolled);
+  }
 
   /**
    * Mobile nav toggle
@@ -60,9 +66,18 @@
    */
   const preloader = document.querySelector('#preloader');
   if (preloader) {
-    window.addEventListener('load', () => {
+    const removePreloader = () => {
       preloader.remove();
-    });
+    };
+
+    // Remove preloader on load or after a timeout (fallback)
+    if (document.readyState === 'complete') {
+      removePreloader();
+    } else {
+      window.addEventListener('load', removePreloader);
+      // Fallback: remove after 2 seconds max if load is stuck (e.g. slow video)
+      setTimeout(removePreloader, 2000);
+    }
   }
 
   /**
@@ -83,7 +98,11 @@
     });
   });
 
-  window.addEventListener('load', toggleScrollTop);
+  if (document.readyState === 'complete') {
+    toggleScrollTop();
+  } else {
+    window.addEventListener('load', toggleScrollTop);
+  }
   document.addEventListener('scroll', toggleScrollTop);
 
   /**
@@ -97,7 +116,11 @@
       mirror: false
     });
   }
-  window.addEventListener('load', aosInit);
+  if (document.readyState === 'complete') {
+    aosInit();
+  } else {
+    window.addEventListener('load', aosInit);
+  }
 
   /**
    * Initiate Pure Counter
@@ -121,7 +144,11 @@
     });
   }
 
-  window.addEventListener("load", initSwiper);
+  if (document.readyState === 'complete') {
+    initSwiper();
+  } else {
+    window.addEventListener("load", initSwiper);
+  }
 
   /**
    * Initiate glightbox
@@ -187,7 +214,12 @@
   window.updateCartBadge = updateCartBadge;
 
   // Update on load
-  window.addEventListener('load', updateCartBadge);
+  // Update on load
+  if (document.readyState === 'complete') {
+    updateCartBadge();
+  } else {
+    window.addEventListener('load', updateCartBadge);
+  }
   // Listen for storage changes (in case of multiple tabs)
   window.addEventListener('storage', updateCartBadge);
 

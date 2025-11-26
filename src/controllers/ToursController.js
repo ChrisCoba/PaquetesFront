@@ -102,7 +102,7 @@ export const ToursController = {
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="tour-card">
                         <div class="tour-image">
-                            <img src="${tour.ImagenUrl || '../assets/img/travel/tour-1.webp'}" alt="${tour.Nombre}" class="img-fluid" style="height: 250px; object-fit: cover; width: 100%;">
+                            <img src="${tour.ImagenUrl || '../assets/img/travel/tour-1.webp'}" alt="${tour.Nombre}" class="img-fluid" style="height: 250px; object-fit: cover; width: 100%;" loading="lazy">
                             <div class="tour-price">$${tour.PrecioActual}</div>
                         </div>
                         <div class="tour-content">
@@ -196,7 +196,7 @@ export const ToursController = {
                 <div class="col-lg-3 col-md-6 mb-4" data-aos="fade-up">
                     <div class="card h-100 shadow-sm border-0">
                         <div class="position-relative">
-                            <img src="${tour.ImagenUrl || 'assets/img/travel/tour-1.webp'}" class="card-img-top rounded-top" alt="${tour.Nombre}" style="height: 200px; object-fit: cover;">
+                            <img src="${tour.ImagenUrl || 'assets/img/travel/tour-1.webp'}" class="card-img-top rounded-top" alt="${tour.Nombre}" style="height: 200px; object-fit: cover;" loading="lazy">
                             <div class="position-absolute top-0 end-0 m-2 badge bg-primary">$${tour.PrecioActual}</div>
                         </div>
                         <div class="card-body">
