@@ -114,6 +114,14 @@ export const AdminController = {
                 `;
                 tbody.appendChild(tr);
             });
+
+            // Add event listeners for user actions
+            tbody.querySelectorAll('.btn-info').forEach(btn => {
+                btn.addEventListener('click', () => alert('Funcionalidad de editar usuario en desarrollo'));
+            });
+            tbody.querySelectorAll('.btn-danger').forEach(btn => {
+                btn.addEventListener('click', () => alert('Funcionalidad de eliminar usuario en desarrollo'));
+            });
         } catch (error) {
             tbody.innerHTML = `<tr><td colspan="4" class="text-danger">Error loading users: ${error.message}</td></tr>`;
         }
@@ -239,6 +247,24 @@ export const AdminController = {
             DuracionDias: parseInt(document.getElementById('tourDuration').value),
             ImagenUrl: document.getElementById('tourImageUrl').value
         };
+
+        // Validation
+        if (![1, 2].includes(tourData.CiudadId)) {
+            alert('ID de Ciudad inválido. Debe ser 1 (San Juan) o 2 (Guayaquil).');
+            return;
+        }
+        if (tourData.CupoMaximo < 1 || tourData.CupoMaximo > 30) {
+            alert('El Cupo Máximo debe estar entre 1 y 30.');
+            return;
+        }
+        if (tourData.DuracionDias < 1 || tourData.DuracionDias > 3) {
+            alert('La Duración debe estar entre 1 y 3 días.');
+            return;
+        }
+        if (isNaN(tourData.PrecioBase) || tourData.PrecioBase < 0) {
+            alert('El Precio Base debe ser un número positivo.');
+            return;
+        }
 
         try {
             submitBtn.disabled = true;
