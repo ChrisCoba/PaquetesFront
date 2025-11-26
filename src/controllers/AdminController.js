@@ -5,8 +5,12 @@ export const AdminController = {
     // Pagination state
     currentPage: 1,
     itemsPerPage: 30,
+    // Pagination state
+    currentPage: 1,
+    itemsPerPage: 30,
     allUsers: [], // Store all users for client-side pagination
     currentTab: 'active', // 'active' or 'inactive'
+    searchTerm: '', // Search term
     userToDeleteId: null, // Store ID for deletion confirmation
 
     init: () => {
@@ -137,6 +141,16 @@ export const AdminController = {
                 AdminController.renderUserTable();
             });
         }
+
+        // Search Input
+        const searchInput = document.getElementById('user-search');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                AdminController.searchTerm = e.target.value.toLowerCase();
+                AdminController.currentPage = 1;
+                AdminController.renderUserTable();
+            });
+        }
     },
 
     // --- Users ---
@@ -159,14 +173,26 @@ export const AdminController = {
         const tbody = document.querySelector('#user-manage-view tbody');
         tbody.innerHTML = '';
 
-        // Filter users based on current tab
+        // Filter users based on current tab and search term
+        // Filter users based on current tab and search term
         const filteredUsers = AdminController.allUsers.filter(user => {
-            const isActive = user.Activo !== undefined ? user.Activo : (user.activo !== undefined ? user.activo : true);
-            if (AdminController.currentTab === 'active') {
-                return isActive === true;
-            } else {
-                return isActive === false;
+            // 1. Filter by Tab (Active/Inactive)
+            let isActive = true;
+            if (user.Activo !== undefined && user.Activo !== null) {
+                isActive = user.Activo === true || user.Activo === 1 || user.Activo === 'true';
+            } else if (user.activo !== undefined && user.activo !== null) {
+                isActive = user.activo === true || user.activo === 1 || user.activo === 'true';
             }
+
+            const matchesTab = AdminController.currentTab === 'active' ? isActive : !isActive;
+
+            // 2. Filter by Search Term
+            const matchesSearch = AdminController.searchTerm === '' ||
+                (user.Nombre && user.Nombre.toLowerCase().includes(AdminController.searchTerm)) ||
+                (user.Apellido && user.Apellido.toLowerCase().includes(AdminController.searchTerm)) ||
+                (user.Email && user.Email.toLowerCase().includes(AdminController.searchTerm));
+
+            return matchesTab && matchesSearch;
         });
 
         const startIndex = (AdminController.currentPage - 1) * AdminController.itemsPerPage;
@@ -216,13 +242,23 @@ export const AdminController = {
         paginationContainer.innerHTML = '';
 
         // Recalculate total pages based on filtered list
+        // Recalculate total pages based on filtered list
         const filteredUsers = AdminController.allUsers.filter(user => {
-            const isActive = user.Activo !== undefined ? user.Activo : (user.activo !== undefined ? user.activo : true);
-            if (AdminController.currentTab === 'active') {
-                return isActive === true;
-            } else {
-                return isActive === false;
+            let isActive = true;
+            if (user.Activo !== undefined && user.Activo !== null) {
+                isActive = user.Activo === true || user.Activo === 1 || user.Activo === 'true';
+            } else if (user.activo !== undefined && user.activo !== null) {
+                isActive = user.activo === true || user.activo === 1 || user.activo === 'true';
             }
+
+            const matchesTab = AdminController.currentTab === 'active' ? isActive : !isActive;
+
+            const matchesSearch = AdminController.searchTerm === '' ||
+                (user.Nombre && user.Nombre.toLowerCase().includes(AdminController.searchTerm)) ||
+                (user.Apellido && user.Apellido.toLowerCase().includes(AdminController.searchTerm)) ||
+                (user.Email && user.Email.toLowerCase().includes(AdminController.searchTerm));
+
+            return matchesTab && matchesSearch;
         });
 
         const totalPages = Math.ceil(filteredUsers.length / AdminController.itemsPerPage);

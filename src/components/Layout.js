@@ -1,6 +1,17 @@
 
+import { AuthService } from '../services/AuthService.js';
+
+// Expose AuthService for inline onclick handlers
+window.AuthService = AuthService;
+
 export function renderLayout() {
-    const headerHTML = `
+  const user = AuthService.getCurrentUser();
+
+  const registerLink = user
+    ? `<a class="btn-getstarted" href="#" onclick="AuthService.logout(); return false;">Cerrar Sesión</a>`
+    : `<a class="btn-getstarted" href="/pages/register.html">Registrarse</a>`;
+
+  const headerHTML = `
   <header id="header" class="header d-flex align-items-center fixed-top">
     <div class="header-container container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
 
@@ -23,13 +34,13 @@ export function renderLayout() {
 
       <a class="btn-shopping-cart" href="/pages/car.html"><i class="bi bi-cart"></i><span class="badge bg-danger">2</span></a>
 
-      <a class="btn-getstarted" href="/pages/register.html">Registrarse</a>
+      ${registerLink}
 
     </div>
   </header>
   `;
 
-    const footerHTML = `
+  const footerHTML = `
   <footer id="footer" class="footer position-relative dark-background">
 
     <div class="container footer-top">
@@ -72,37 +83,37 @@ export function renderLayout() {
   </footer>
   `;
 
-    // Inject Header
-    const headerContainer = document.getElementById('app-header');
-    if (headerContainer) {
-        headerContainer.innerHTML = headerHTML;
-    }
+  // Inject Header
+  const headerContainer = document.getElementById('app-header');
+  if (headerContainer) {
+    headerContainer.innerHTML = headerHTML;
+  }
 
-    // Inject Footer
-    const footerContainer = document.getElementById('app-footer');
-    if (footerContainer) {
-        footerContainer.innerHTML = footerHTML;
-    }
+  // Inject Footer
+  const footerContainer = document.getElementById('app-footer');
+  if (footerContainer) {
+    footerContainer.innerHTML = footerHTML;
+  }
 
-    // Highlight Active Link
-    const path = window.location.pathname;
-    if (path.endsWith('index.html') || path === '/') {
-        document.getElementById('nav-home')?.classList.add('active');
-    } else if (path.includes('about.html')) {
-        document.getElementById('nav-about')?.classList.add('active');
-    } else if (path.includes('destinations.html')) {
-        document.getElementById('nav-destinations')?.classList.add('active');
-    } else if (path.includes('tours.html')) {
-        document.getElementById('nav-tours')?.classList.add('active');
-    } else if (path.includes('login.html')) {
-        document.getElementById('nav-login')?.classList.add('active');
-    }
+  // Highlight Active Link
+  const path = window.location.pathname;
+  if (path.endsWith('index.html') || path === '/') {
+    document.getElementById('nav-home')?.classList.add('active');
+  } else if (path.includes('about.html')) {
+    document.getElementById('nav-about')?.classList.add('active');
+  } else if (path.includes('destinations.html')) {
+    document.getElementById('nav-destinations')?.classList.add('active');
+  } else if (path.includes('tours.html')) {
+    document.getElementById('nav-tours')?.classList.add('active');
+  } else if (path.includes('login.html')) {
+    document.getElementById('nav-login')?.classList.add('active');
+  }
 
-    // Load main.js dynamically to ensure it runs AFTER header is injected
-    // We check if it's already loaded to avoid duplicates, though main.js is usually not idempotent if it adds listeners.
-    // But since we removed it from HTML, we should load it here.
-    const script = document.createElement('script');
-    script.src = '/js/main.js';
-    script.async = true;
-    document.body.appendChild(script);
+  // Load main.js dynamically to ensure it runs AFTER header is injected
+  // We check if it's already loaded to avoid duplicates, though main.js is usually not idempotent if it adds listeners.
+  // But since we removed it from HTML, we should load it here.
+  const script = document.createElement('script');
+  script.src = '/js/main.js';
+  script.async = true;
+  document.body.appendChild(script);
 }
