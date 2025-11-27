@@ -4,7 +4,17 @@ import { AuthService } from '../services/AuthService.js';
 // Expose AuthService for inline onclick handlers
 window.AuthService = AuthService;
 
+// Flag to prevent multiple executions
+let layoutRendered = false;
+
 export function renderLayout() {
+  // Prevent multiple executions
+  if (layoutRendered) {
+    console.warn('renderLayout() already executed, skipping...');
+    return;
+  }
+  layoutRendered = true;
+
   const user = AuthService.getCurrentUser();
 
   // User requested "Mi Perfil" instead of "Cerrar Sesión", but typically "Mi Perfil" goes to a profile page.
