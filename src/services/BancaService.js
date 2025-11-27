@@ -2,7 +2,7 @@
  * Service for handling bank transactions
  */
 export const BancaService = {
-    API_BASE_URL: 'http://mibanca.runasp.net',
+    API_BASE_URL: 'https://mibanca.runasp.net',
 
     /**
      * Create a transaction
