@@ -2,8 +2,8 @@
  * Service for handling bank transactions
  */
 export const BancaService = {
-    // Use the main backend as a proxy to avoid Mixed Content (HTTPS -> HTTP)
-    API_BASE_URL: 'https://worldagency.runasp.net/api/v1/integracion/banca',
+    // Reverted to direct HTTP call (will cause Mixed Content error on HTTPS)
+    API_BASE_URL: 'http://mibanca.runasp.net/api/transacciones',
 
     /**
      * Create a transaction
