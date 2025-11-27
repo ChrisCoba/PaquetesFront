@@ -225,37 +225,7 @@ export const AuthController = {
     },
 
     updateUI: () => {
-        const user = AuthService.getCurrentUser();
-        const navMenu = document.querySelector('#navmenu ul');
-
-        if (!navMenu) return;
-
-        // Remove existing auth links to prevent duplicates if called multiple times
-        const authLinks = navMenu.querySelectorAll('.auth-link');
-        authLinks.forEach(link => link.remove());
-
-        if (user) {
-            // User is logged in
-            const profileHtml = `
-                <li class="dropdown auth-link"><a href="#"><span>Hola, ${user.Nombre}</span> <i class="bi bi-chevron-down toggle-dropdown"></i></a>
-                    <ul>
-                        <li><a href="${window.location.pathname.includes('/pages/') ? 'user.html' : 'pages/user.html'}">Mi Perfil</a></li>
-                        ${user.Email === 'admin@agencia.local' ? `<li><a href="${window.location.pathname.includes('/pages/') ? 'admin.html' : 'pages/admin.html'}">Admin</a></li>` : ''}
-                        <li><a href="#" id="logout-btn">Cerrar Sesión</a></li>
-                    </ul>
-                </li>
-            `;
-            navMenu.insertAdjacentHTML('beforeend', profileHtml);
-
-            // Hide "Iniciar Sesión" link if it exists in the static HTML
-            const loginLink = Array.from(navMenu.querySelectorAll('a')).find(a => a.textContent.includes('Iniciar Sesión'));
-            if (loginLink) loginLink.parentElement.style.display = 'none';
-
-        } else {
-            // User is logged out
-            const loginLink = Array.from(navMenu.querySelectorAll('a')).find(a => a.textContent.includes('Iniciar Sesión'));
-            if (loginLink) loginLink.parentElement.style.display = 'block';
-        }
+        // UI is handled by Layout.js
     }
 };
 

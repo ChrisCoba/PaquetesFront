@@ -2,7 +2,8 @@
  * Service for handling bank transactions
  */
 export const BancaService = {
-    API_BASE_URL: 'https://mibanca.runasp.net',
+    // Use the main backend as a proxy to avoid Mixed Content (HTTPS -> HTTP)
+    API_BASE_URL: 'https://worldagency.runasp.net/api/v1/integracion/banca',
 
     /**
      * Create a transaction
@@ -13,7 +14,7 @@ export const BancaService = {
      */
     async crearTransaccion(cuentaOrigen, cuentaDestino, monto) {
         try {
-            const response = await fetch(`${this.API_BASE_URL}/api/transacciones`, {
+            const response = await fetch(`${this.API_BASE_URL}/transaccion`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
