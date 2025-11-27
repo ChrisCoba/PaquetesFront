@@ -141,10 +141,11 @@ export function renderLayout() {
   }
 
   // Load main.js dynamically to ensure it runs AFTER header is injected
-  // We check if it's already loaded to avoid duplicates, though main.js is usually not idempotent if it adds listeners.
-  // But since we removed it from HTML, we should load it here.
-  const script = document.createElement('script');
-  script.src = '/js/main.js';
-  script.async = true;
-  document.body.appendChild(script);
+  // Check if it's already loaded to avoid duplicates
+  if (!document.querySelector('script[src="/js/main.js"]')) {
+    const script = document.createElement('script');
+    script.src = '/js/main.js';
+    script.async = true;
+    document.body.appendChild(script);
+  }
 }
