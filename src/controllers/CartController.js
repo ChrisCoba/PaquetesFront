@@ -6,7 +6,7 @@ import { ReservasService } from '../services/ReservasService.js';
 
 export const CartController = {
     // Agency Account
-    CUENTA_DESTINO: 1787654321,
+    CUENTA_DESTINO: 198,
 
     init: () => {
         const cartContainer = document.getElementById('cart-items-container');
@@ -127,7 +127,7 @@ export const CartController = {
                     BookingUserId: bookingUserId,
                     FechaInicio: today,
                     Personas: totalPersonas,
-                    DuracionHoldSegundos: 600
+                    DuracionHoldSegundos: 100
                 };
                 console.log('Sending Hold Request:', JSON.stringify(holdPayload, null, 2));
 
