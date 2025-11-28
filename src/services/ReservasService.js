@@ -29,7 +29,10 @@ export const ReservasService = {
             },
             body: JSON.stringify(data),
         });
-        if (!response.ok) throw new Error('Error confirming booking');
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Error confirming booking');
+        }
         return response.json();
     }
 };
