@@ -2,7 +2,8 @@
  * Service for handling bank transactions
  */
 export const BancaService = {
-    API_BASE_URL: 'http://mibanca.runasp.net',
+    // URL del Backend Proxy (HTTPS)
+    API_BASE_URL: 'https://worldagency.runasp.net/api/v1/integracion/paquetes',
 
     /**
      * Create a transaction
@@ -13,26 +14,31 @@ export const BancaService = {
      */
     async crearTransaccion(cuentaOrigen, cuentaDestino, monto) {
         try {
-            const response = await fetch(`${this.API_BASE_URL}/api/transacciones`, {
+            const response = await fetch(`${this.API_BASE_URL}/pagar`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    cuenta_origen: cuentaOrigen,
-                    cuenta_destino: cuentaDestino,
-                    monto: monto
+                    cuentaOrigen: parseInt(cuentaOrigen),
+                    cuentaDestino: parseInt(cuentaDestino),
+                    total: parseFloat(monto)
                 })
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                return data || { exito: true, mensaje: 'Transacción procesada' };
+                return {
+                    exito: true,
+                    mensaje: data.Mensaje || 'Transacción procesada',
+                    transaccion_id: data.TransaccionId
+                };
             } else {
                 return {
                     exito: false,
-                    mensaje: `Error al procesar transacción: ${response.status} - ${JSON.stringify(data)}`
+                    mensaje: data.message || `Error al procesar transacción: ${response.status}`
                 };
             }
         } catch (error) {
