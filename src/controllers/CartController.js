@@ -155,7 +155,7 @@ export const CartController = {
             // 5. Confirm Bookings (Create Reservations)
             const reservations = [];
             for (const { item, holdId } of holds) {
-                const bookData = await ReservasService.book({
+                const bookPayload = {
                     IdPaquete: item.tourId,
                     HoldId: holdId,
                     BookingUserId: bookingUserId,
@@ -166,7 +166,10 @@ export const CartController = {
                         Identificacion: nroCliente,
                         TipoIdentificacion: "CEDULA"
                     }]
-                });
+                };
+                console.log('Sending Book Request:', JSON.stringify(bookPayload, null, 2));
+
+                const bookData = await ReservasService.book(bookPayload);
                 reservations.push(bookData);
             }
 
