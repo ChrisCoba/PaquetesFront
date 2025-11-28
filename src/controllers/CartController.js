@@ -175,7 +175,7 @@ export const CartController = {
 
             // 6. Generate Invoice
             // Use the first reservation ID for the invoice, or a combined reference
-            const mainReservaId = reservations[0]?.idReserva || paymentResponse.transaccion_id;
+            const mainReservaId = reservations[0]?.idReserva || reservations[0]?.IdReserva || paymentResponse.transaccion_id;
 
             let invoiceMsg = "";
             try {
