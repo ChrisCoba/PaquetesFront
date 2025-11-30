@@ -1,8 +1,16 @@
 
 import { AuthService } from '../services/AuthService.js';
+import { USE_SOAP } from '../services/config.js';
 
 // Expose AuthService for inline onclick handlers
 window.AuthService = AuthService;
+
+// Expose toggleSoap for inline onchange handler
+window.toggleSoap = function (checkbox) {
+  USE_SOAP.value = checkbox.checked;
+  console.log('Protocol switched to:', USE_SOAP.value ? 'SOAP' : 'REST');
+  alert(`Protocolo cambiado a ${USE_SOAP.value ? 'SOAP' : 'REST'}`);
+};
 
 // Flag to prevent multiple executions
 let layoutRendered = false;
@@ -99,6 +107,14 @@ export function renderLayout() {
             <li><i class="bi bi-chevron-right"></i> <a href="/pages/destinations.html">Destinos</a></li>
             <li><i class="bi bi-chevron-right"></i> <a href="/pages/tours.html">Tours</a></li>
           </ul>
+        </div>
+
+        <div class="col-lg-2 col-md-12 footer-links">
+          <h4>Configuración</h4>
+          <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="soapSwitch" onchange="toggleSoap(this)">
+              <label class="form-check-label" for="soapSwitch" style="color: white;">Usar SOAP</label>
+          </div>
         </div>
 
         <div class="col-lg-4 col-md-12">

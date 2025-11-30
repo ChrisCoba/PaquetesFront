@@ -1,17 +1,12 @@
-import { API_BASE_URL } from './config.js';
+import { API_BASE_URL, USE_SOAP } from './config.js';
+import { SoapClient } from './soap/SoapClient';
 
-export const AuthService = {
-    /**
-     * Login user
-     * @param {Object} credentials - { email, password }
-     */
+const AuthServiceRest = {
     async login(credentials) {
         try {
             const response = await fetch(`${API_BASE_URL}/login`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(credentials),
             });
 
@@ -21,7 +16,6 @@ export const AuthService = {
             }
 
             const user = await response.json();
-            // Save user session
             localStorage.setItem('user', JSON.stringify(user));
             return user;
         } catch (error) {
@@ -30,13 +24,8 @@ export const AuthService = {
         }
     },
 
-    /**
-     * Register a new user
-     * @param {Object} data - { email, password, nombre, apellido, claveAdmin }
-     */
     async register(data) {
         try {
-            // Transform data to match backend expectations (capitalized field names)
             const payload = {
                 Email: data.email,
                 Password: data.password,
@@ -47,9 +36,7 @@ export const AuthService = {
 
             const response = await fetch(`${API_BASE_URL}/usuarios`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
             });
 
@@ -63,27 +50,68 @@ export const AuthService = {
             console.error('Registration error:', error);
             throw error;
         }
+    }
+};
+
+const AuthServiceSoap = {
+    async login(credentials) {
+        try {
+            const soapParams = {
+                email: credentials.email,
+                password: credentials.password
+            };
+
+            const user = await SoapClient.call('Login', soapParams);
+
+            if (!user) throw new Error('Invalid credentials');
+
+            // Normalize user object if needed (SoapClient returns strings)
+            // Assuming UsuarioDto structure: Id, Email, Nombre, Apellido, EsAdmin
+            // We might need to convert EsAdmin to boolean if the app relies on it strictly
+            if (user.EsAdmin === 'true') user.EsAdmin = true;
+            if (user.EsAdmin === 'false') user.EsAdmin = false;
+
+            localStorage.setItem('user', JSON.stringify(user));
+            return user;
+        } catch (error) {
+            console.error('SOAP Login error:', error);
+            throw error;
+        }
     },
 
-    /**
-     * Logout user
-     */
+    async register(data) {
+        try {
+            const soapParams = {
+                email: data.email,
+                password: data.password,
+                nombre: data.nombre,
+                apellido: data.apellido
+                // Note: ClaveAdmin logic might be missing in SOAP backend if I didn't add it explicitly to logic/service
+            };
+
+            const user = await SoapClient.call('CrearUsuario', soapParams);
+            return user;
+        } catch (error) {
+            console.error('SOAP Registration error:', error);
+            throw error;
+        }
+    }
+};
+
+export const AuthService = {
+    login: (credentials) => USE_SOAP.value ? AuthServiceSoap.login(credentials) : AuthServiceRest.login(credentials),
+    register: (data) => USE_SOAP.value ? AuthServiceSoap.register(data) : AuthServiceRest.register(data),
+
     logout() {
         localStorage.removeItem('user');
         window.location.href = '../index.html';
     },
 
-    /**
-     * Get current user
-     */
     getCurrentUser() {
         const userStr = localStorage.getItem('user');
         return userStr ? JSON.parse(userStr) : null;
     },
 
-    /**
-     * Check if user is authenticated
-     */
     isAuthenticated() {
         return !!this.getCurrentUser();
     }

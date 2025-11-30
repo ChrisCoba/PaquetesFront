@@ -1,17 +1,13 @@
 /**
  * Service for handling bank transactions
  */
-export const BancaService = {
+import { USE_SOAP } from './config';
+import { SoapClient } from './soap/SoapClient';
+
+const BancaServiceRest = {
     // URL del Backend Proxy (HTTPS)
     API_BASE_URL: 'https://worldagency.runasp.net/api/v1/integracion/paquetes',
 
-    /**
-     * Create a transaction
-     * @param {number} cuentaOrigen - Source account number
-     * @param {number} cuentaDestino - Destination account number
-     * @param {number} monto - Transaction amount
-     * @returns {Promise<{exito: boolean, mensaje: string, transaccion_id?: number}>}
-     */
     async crearTransaccion(cuentaOrigen, cuentaDestino, monto) {
         try {
             const response = await fetch(`${this.API_BASE_URL}/pagar`, {
@@ -48,4 +44,35 @@ export const BancaService = {
             };
         }
     }
+};
+
+const BancaServiceSoap = {
+    async crearTransaccion(cuentaOrigen, cuentaDestino, monto) {
+        try {
+            const soapParams = {
+                cuentaOrigen: parseInt(cuentaOrigen),
+                cuentaDestino: parseInt(cuentaDestino),
+                total: parseFloat(monto)
+            };
+
+            const result = await SoapClient.call('Pagar', soapParams);
+
+            // Result is { Exito: "true", Mensaje: "...", TransaccionId: "123" }
+            return {
+                exito: result.Exito === 'true',
+                mensaje: result.Mensaje,
+                transaccion_id: result.TransaccionId ? parseInt(result.TransaccionId) : null
+            };
+        } catch (error) {
+            return {
+                exito: false,
+                mensaje: `Error SOAP: ${error.message}`
+            };
+        }
+    }
+};
+
+export const BancaService = {
+    crearTransaccion: (cuentaOrigen, cuentaDestino, monto) =>
+        USE_SOAP.value ? BancaServiceSoap.crearTransaccion(cuentaOrigen, cuentaDestino, monto) : BancaServiceRest.crearTransaccion(cuentaOrigen, cuentaDestino, monto)
 };
