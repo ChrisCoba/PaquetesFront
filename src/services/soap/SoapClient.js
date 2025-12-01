@@ -56,6 +56,12 @@ export const SoapClient = {
     toXml(obj, key = null) {
         let xml = '';
 
+        // Skip null and undefined - don't include in XML at all
+        // SOAP backend expects missing params for nullable types
+        if (obj === null || obj === undefined) {
+            return '';
+        }
+
         if (Array.isArray(obj)) {
             // For arrays, we usually repeat the tag for each item, 
             // BUT in SOAP/ASMX, it depends on the WSDL. 
