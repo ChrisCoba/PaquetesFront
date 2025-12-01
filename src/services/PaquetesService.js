@@ -41,12 +41,15 @@ const PaquetesServiceRest = {
 const PaquetesServiceSoap = {
     async search(params) {
         // Map REST params to SOAP params
+        // Send null for empty values so backend doesn't treat them as filters
         const soapParams = {
-            ciudad: params.city || '',
-            fechaInicio: params.fechainicio || '',
-            tipoActividad: params.tipoActividad || '',
-            precioMax: params.precioMax || 0
+            ciudad: params.city || null,
+            fechaInicio: params.fechainicio || null,
+            tipoActividad: params.tipoActividad || null,
+            precioMax: (params.precioMax && params.precioMax > 0) ? params.precioMax : null
         };
+
+        console.log('Sending SOAP params:', soapParams);
 
         const result = await SoapClient.call('BuscarPaquetes', soapParams);
         console.log('SOAP BuscarPaquetes raw result:', result);
