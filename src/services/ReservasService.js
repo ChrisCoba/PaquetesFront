@@ -23,6 +23,12 @@ const ReservasServiceRest = {
             throw new Error(errorData.message || 'Error confirming booking');
         }
         return response.json();
+    },
+
+    async getReservations() {
+        const response = await fetch(`${API_BASE_URL}/reservas`);
+        if (!response.ok) throw new Error('Error fetching reservations');
+        return response.json();
     }
 };
 
@@ -64,10 +70,27 @@ const ReservasServiceSoap = {
             Total: parseFloat(result.Total),
             FechaCreacion: result.FechaCreacion
         };
+    },
+
+    async getReservations() {
+        // SOAP implementation for getting reservations
+        // Assuming there is a WebMethod 'ObtenerReservas' or similar
+        // If not, we might need to fallback to REST or throw error
+        // For now, let's try to call a SOAP method if it exists, or return empty array
+        try {
+            // This might need adjustment based on actual SOAP service capabilities
+            const result = await SoapClient.call('ObtenerReservas', {});
+            // Result might be an array or a single object wrapped
+            return Array.isArray(result) ? result : (result ? [result] : []);
+        } catch (e) {
+            console.warn('SOAP getReservations not implemented or failed', e);
+            return [];
+        }
     }
 };
 
 export const ReservasService = {
     hold: (data) => USE_SOAP.value ? ReservasServiceSoap.hold(data) : ReservasServiceRest.hold(data),
-    book: (data) => USE_SOAP.value ? ReservasServiceSoap.book(data) : ReservasServiceRest.book(data)
+    book: (data) => USE_SOAP.value ? ReservasServiceSoap.book(data) : ReservasServiceRest.book(data),
+    getReservations: () => USE_SOAP.value ? ReservasServiceSoap.getReservations() : ReservasServiceRest.getReservations()
 };

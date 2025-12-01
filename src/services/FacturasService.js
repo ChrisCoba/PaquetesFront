@@ -15,5 +15,14 @@ export const FacturasService = {
         });
         if (!response.ok) throw new Error('Error emitting invoice');
         return response.json();
+    },
+
+    /**
+     * Get all invoices
+     */
+    async getInvoices() {
+        const response = await fetch(`${API_BASE_URL}/invoices/list`);
+        if (!response.ok) throw new Error('Error fetching invoices');
+        return response.json();
     }
 };

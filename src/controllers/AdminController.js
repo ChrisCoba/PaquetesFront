@@ -9,6 +9,10 @@ export const AdminController = {
     currentPage: 1,
     itemsPerPage: 30,
     allUsers: [], // Store all users for client-side pagination
+    allReservations: [], // Store all reservations
+    allInvoices: [], // Store all invoices
+    currentReservationPage: 1,
+    currentInvoicePage: 1,
     statusFilter: 'active', // 'all', 'active', 'inactive'
     searchTerm: '', // Search term
     userToDeleteId: null, // Store ID for deletion confirmation
@@ -572,6 +576,7 @@ export const AdminController = {
     },
 
     // --- Reservations ---
+    // --- Reservations ---
     loadReservations: async () => {
         const tbody = document.querySelector('#reservation-manage-view tbody');
         if (!tbody) return;
@@ -579,42 +584,109 @@ export const AdminController = {
 
         try {
             const reservations = await AdminService.getReservations();
-            tbody.innerHTML = '';
-            reservations.forEach(res => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${res.IdReserva}</td>
-                    <td>${res.ClienteNombre}</td>
-                    <td>${new Date(res.FechaCreacion).toLocaleDateString()}</td>
-                    <td>${res.Estado || 'Pendiente'}</td>
-                    <td>$${res.Total}</td>
-                    <td>
-                        ${res.Estado !== 'Cancelada' ? `<button class="btn btn-sm btn-danger btn-cancel-res" data-id="${res.IdReserva}">Cancelar</button>` : ''}
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-
-            // Add event listeners for cancel buttons
-            document.querySelectorAll('.btn-cancel-res').forEach(btn => {
-                btn.addEventListener('click', async (e) => {
-                    const reason = prompt('Ingrese el motivo de la cancelación:');
-                    if (reason) {
-                        const id = e.target.getAttribute('data-id');
-                        try {
-                            await AdminService.cancelReservation(id, reason);
-                            alert('Reserva cancelada');
-                            AdminController.loadReservations();
-                        } catch (error) {
-                            alert('Error al cancelar reserva: ' + error.message);
-                        }
-                    }
-                });
-            });
-
+            AdminController.allReservations = reservations;
+            AdminController.currentReservationPage = 1; // Reset to first page on load
+            AdminController.renderReservationTable();
         } catch (error) {
             tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Error loading reservations: ${error.message}</td></tr>`;
         }
+    },
+
+    renderReservationTable: () => {
+        const tbody = document.querySelector('#reservation-manage-view tbody');
+        tbody.innerHTML = '';
+
+        const startIndex = (AdminController.currentReservationPage - 1) * AdminController.itemsPerPage;
+        const endIndex = startIndex + AdminController.itemsPerPage;
+        const reservationsToShow = AdminController.allReservations.slice(startIndex, endIndex);
+
+        if (reservationsToShow.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6">No hay reservas registradas.</td></tr>';
+            return;
+        }
+
+        reservationsToShow.forEach(res => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${res.IdReserva}</td>
+                <td>${res.ClienteNombre}</td>
+                <td>${new Date(res.FechaCreacion).toLocaleDateString()}</td>
+                <td>${res.Estado || 'Pendiente'}</td>
+                <td>$${res.Total}</td>
+                <td>
+                    ${res.Estado !== 'Cancelada' ? `<button class="btn btn-sm btn-danger btn-cancel-res" data-id="${res.IdReserva}">Cancelar</button>` : ''}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Add event listeners for cancel buttons
+        document.querySelectorAll('.btn-cancel-res').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                const reason = prompt('Ingrese el motivo de la cancelación:');
+                if (reason) {
+                    const id = e.target.getAttribute('data-id');
+                    try {
+                        await AdminService.cancelReservation(id, reason);
+                        alert('Reserva cancelada');
+                        AdminController.loadReservations();
+                    } catch (error) {
+                        alert('Error al cancelar reserva: ' + error.message);
+                    }
+                }
+            });
+        });
+
+        AdminController.renderReservationPagination();
+    },
+
+    renderReservationPagination: () => {
+        const paginationContainer = document.getElementById('reservation-pagination');
+        if (!paginationContainer) return;
+        paginationContainer.innerHTML = '';
+
+        const totalPages = Math.ceil(AdminController.allReservations.length / AdminController.itemsPerPage);
+
+        if (totalPages <= 1) return;
+
+        // Previous
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${AdminController.currentReservationPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#">Anterior</a>`;
+        prevLi.onclick = (e) => {
+            e.preventDefault();
+            if (AdminController.currentReservationPage > 1) {
+                AdminController.currentReservationPage--;
+                AdminController.renderReservationTable();
+            }
+        };
+        paginationContainer.appendChild(prevLi);
+
+        // Page Numbers
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${AdminController.currentReservationPage === i ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.onclick = (e) => {
+                e.preventDefault();
+                AdminController.currentReservationPage = i;
+                AdminController.renderReservationTable();
+            };
+            paginationContainer.appendChild(li);
+        }
+
+        // Next
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${AdminController.currentReservationPage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#">Siguiente</a>`;
+        nextLi.onclick = (e) => {
+            e.preventDefault();
+            if (AdminController.currentReservationPage < totalPages) {
+                AdminController.currentReservationPage++;
+                AdminController.renderReservationTable();
+            }
+        };
+        paginationContainer.appendChild(nextLi);
     },
 
     // --- Payments (Invoices) ---
@@ -625,21 +697,89 @@ export const AdminController = {
 
         try {
             const invoices = await AdminService.getInvoices();
-            tbody.innerHTML = '';
-            invoices.forEach(inv => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td>${inv.IdFactura}</td>
-                    <td>${inv.ReservaId}</td>
-                    <td>${new Date(inv.FechaEmision).toLocaleDateString()}</td>
-                    <td>$${inv.Total}</td>
-                    <td><span class="badge bg-success">Pagado</span></td>
-                `;
-                tbody.appendChild(tr);
-            });
+            AdminController.allInvoices = invoices;
+            AdminController.currentInvoicePage = 1; // Reset to first page
+            AdminController.renderInvoiceTable();
         } catch (error) {
             tbody.innerHTML = `<tr><td colspan="5" class="text-danger">Error loading invoices: ${error.message}</td></tr>`;
         }
+    },
+
+    renderInvoiceTable: () => {
+        const tbody = document.querySelector('#payment-view-view tbody');
+        tbody.innerHTML = '';
+
+        const startIndex = (AdminController.currentInvoicePage - 1) * AdminController.itemsPerPage;
+        const endIndex = startIndex + AdminController.itemsPerPage;
+        const invoicesToShow = AdminController.allInvoices.slice(startIndex, endIndex);
+
+        if (invoicesToShow.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5">No hay facturas registradas.</td></tr>';
+            return;
+        }
+
+        invoicesToShow.forEach(inv => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${inv.IdFactura}</td>
+                <td>${inv.ReservaId}</td>
+                <td>${new Date(inv.FechaEmision).toLocaleDateString()}</td>
+                <td>$${inv.Total}</td>
+                <td><span class="badge bg-success">Pagado</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        AdminController.renderInvoicePagination();
+    },
+
+    renderInvoicePagination: () => {
+        const paginationContainer = document.getElementById('invoice-pagination');
+        if (!paginationContainer) return;
+        paginationContainer.innerHTML = '';
+
+        const totalPages = Math.ceil(AdminController.allInvoices.length / AdminController.itemsPerPage);
+
+        if (totalPages <= 1) return;
+
+        // Previous
+        const prevLi = document.createElement('li');
+        prevLi.className = `page-item ${AdminController.currentInvoicePage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="#">Anterior</a>`;
+        prevLi.onclick = (e) => {
+            e.preventDefault();
+            if (AdminController.currentInvoicePage > 1) {
+                AdminController.currentInvoicePage--;
+                AdminController.renderInvoiceTable();
+            }
+        };
+        paginationContainer.appendChild(prevLi);
+
+        // Page Numbers
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = `page-item ${AdminController.currentInvoicePage === i ? 'active' : ''}`;
+            li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+            li.onclick = (e) => {
+                e.preventDefault();
+                AdminController.currentInvoicePage = i;
+                AdminController.renderInvoiceTable();
+            };
+            paginationContainer.appendChild(li);
+        }
+
+        // Next
+        const nextLi = document.createElement('li');
+        nextLi.className = `page-item ${AdminController.currentInvoicePage === totalPages ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="#">Siguiente</a>`;
+        nextLi.onclick = (e) => {
+            e.preventDefault();
+            if (AdminController.currentInvoicePage < totalPages) {
+                AdminController.currentInvoicePage++;
+                AdminController.renderInvoiceTable();
+            }
+        };
+        paginationContainer.appendChild(nextLi);
     }
 };
 

@@ -1,5 +1,7 @@
 import { AuthService } from '../services/AuthService.js';
 import { API_BASE_URL } from '../services/config.js';
+import { ReservasService } from '../services/ReservasService.js';
+import { FacturasService } from '../services/FacturasService.js';
 
 export const UserController = {
     init: () => {
@@ -109,15 +111,17 @@ export const UserController = {
         if (!user) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/reservas`);
-            if (!response.ok) {
-                throw new Error('Error al cargar reservas');
-            }
-
-            const reservas = await response.json();
+            console.log('Loading reservations for user:', user.Email);
+            const reservas = await ReservasService.getReservations();
+            console.log('All reservations fetched:', reservas.length);
 
             // Filter reservations by user email
-            const userReservas = reservas.filter(r => r.ClienteEmail === user.Email);
+            // Check both ClienteEmail and potentially other fields if needed
+            const userReservas = reservas.filter(r =>
+                (r.ClienteEmail && r.ClienteEmail.toLowerCase() === user.Email.toLowerCase()) ||
+                (r.Email && r.Email.toLowerCase() === user.Email.toLowerCase())
+            );
+            console.log('Filtered reservations for user:', userReservas.length);
 
             UserController.renderReservations(userReservas);
         } catch (error) {
@@ -130,7 +134,7 @@ export const UserController = {
         const container = document.querySelector('#v-pills-reservations .list-group');
         if (!container) return;
 
-        if (reservas.length === 0) {
+        if (!reservas || reservas.length === 0) {
             container.innerHTML = '<div class="alert alert-info">No tienes reservas aún.</div>';
             return;
         }
@@ -138,11 +142,11 @@ export const UserController = {
         container.innerHTML = reservas.map(reserva => `
             <div class="list-group-item">
                 <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">Reserva ${reserva.Codigo}</h5>
+                    <h5 class="mb-1">Reserva ${reserva.Codigo || reserva.IdReserva}</h5>
                     <small>${new Date(reserva.FechaCreacion).toLocaleDateString('es-ES')}</small>
                 </div>
-                <p class="mb-1"><strong>Total:</strong> $${reserva.Total.toFixed(2)}</p>
-                <p class="mb-1"><strong>Estado:</strong> ${reserva.Estado}</p>
+                <p class="mb-1"><strong>Total:</strong> $${parseFloat(reserva.Total).toFixed(2)}</p>
+                <p class="mb-1"><strong>Estado:</strong> ${reserva.Estado || 'Pendiente'}</p>
                 <small>ID de Reserva: ${reserva.IdReserva}</small>
             </div>
         `).join('');
@@ -153,15 +157,17 @@ export const UserController = {
         if (!user) return;
 
         try {
-            const response = await fetch(`${API_BASE_URL}/invoices/list`);
-            if (!response.ok) {
-                throw new Error('Error al cargar facturas');
-            }
+            console.log('Loading invoices for user:', user.Email);
+            const facturas = await FacturasService.getInvoices();
+            console.log('All invoices fetched:', facturas.length);
 
-            const facturas = await response.json();
-
-            // Filter invoices by user email (assuming facturas have ClienteEmail)
-            const userFacturas = facturas.filter(f => f.ClienteEmail === user.Email);
+            // Filter invoices by user email
+            // Assuming facturas have ClienteEmail or similar
+            const userFacturas = facturas.filter(f =>
+                (f.ClienteEmail && f.ClienteEmail.toLowerCase() === user.Email.toLowerCase()) ||
+                (f.Email && f.Email.toLowerCase() === user.Email.toLowerCase())
+            );
+            console.log('Filtered invoices for user:', userFacturas.length);
 
             UserController.renderInvoices(userFacturas);
         } catch (error) {
