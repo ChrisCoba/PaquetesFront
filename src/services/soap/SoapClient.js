@@ -75,22 +75,6 @@ export const SoapClient = {
         if (resultNode.children.length > 0) {
             return this.xmlToJson(resultNode);
         }
-
-        // Simple value
-        return resultNode.textContent;
-    },
-
-    xmlToJson(xml) {
-        // Create the return object
-        var obj = {};
-
-        if (xml.nodeType == 1) { // element
-            // do attributes
-            if (xml.attributes.length > 0) {
-                obj["@attributes"] = {};
-                for (var j = 0; j < xml.attributes.length; j++) {
-                    var attribute = xml.attributes.item(j);
-                    obj["@attributes"][attribute.nodeName] = attribute.nodeValue;
                 }
             }
         } else if (xml.nodeType == 3) { // text
