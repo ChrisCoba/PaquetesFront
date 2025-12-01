@@ -66,7 +66,6 @@ export const UserController = {
             submitBtn.disabled = true;
             submitBtn.textContent = 'Actualizando...';
 
-            // Note: You'll need to implement the update user endpoint in the backend
             const payload = {
                 IdUsuario: user.IdUsuario,
                 Nombre: nombre,
@@ -115,11 +114,14 @@ export const UserController = {
             const reservas = await ReservasService.getReservations();
             console.log('All reservations fetched:', reservas.length);
 
-            // Filter reservations by user email
-            // Check both ClienteEmail and potentially other fields if needed
+            // Filter reservations by user email, ID, or ClienteId
+            const userId = user.Id || user.IdUsuario;
+
             const userReservas = reservas.filter(r =>
                 (r.ClienteEmail && r.ClienteEmail.toLowerCase() === user.Email.toLowerCase()) ||
-                (r.Email && r.Email.toLowerCase() === user.Email.toLowerCase())
+                (r.Email && r.Email.toLowerCase() === user.Email.toLowerCase()) ||
+                (r.UsuarioId && userId && r.UsuarioId.toString() === userId.toString()) ||
+                (r.ClienteId && userId && r.ClienteId.toString() === userId.toString())
             );
             console.log('Filtered reservations for user:', userReservas.length);
 
@@ -148,7 +150,7 @@ export const UserController = {
                 <p class="mb-1"><strong>Total:</strong> $${parseFloat(reserva.Total).toFixed(2)}</p>
                 <p class="mb-1"><strong>Estado:</strong> ${reserva.Estado || 'Pendiente'}</p>
                 <div class="d-flex justify-content-between align-items-center">
-                    <small>ID: ${reserva.IdReserva} ${reserva.UsuarioId ? `| User: ${reserva.UsuarioId}` : ''}</small>
+                    <small>ID: ${reserva.IdReserva}</small>
                     <button class="btn btn-sm btn-outline-primary btn-details" data-type="reserva" data-id="${reserva.IdReserva}">Ver Detalles</button>
                 </div>
             </div>
@@ -173,10 +175,14 @@ export const UserController = {
             const facturas = await FacturasService.getInvoices();
             console.log('All invoices fetched:', facturas.length);
 
-            // Filter invoices by user email
+            // Filter invoices by user email, ID, or ClienteId
+            const userId = user.Id || user.IdUsuario;
+
             const userFacturas = facturas.filter(f =>
                 (f.ClienteEmail && f.ClienteEmail.toLowerCase() === user.Email.toLowerCase()) ||
-                (f.Email && f.Email.toLowerCase() === user.Email.toLowerCase())
+                (f.Email && f.Email.toLowerCase() === user.Email.toLowerCase()) ||
+                (f.UsuarioId && userId && f.UsuarioId.toString() === userId.toString()) ||
+                (f.ClienteId && userId && f.ClienteId.toString() === userId.toString())
             );
             console.log('Filtered invoices for user:', userFacturas.length);
 
