@@ -1,5 +1,6 @@
 import { PaquetesService } from '../services/PaquetesService.js';
 import { CartService } from '../services/CartService.js';
+import { ReservasService } from '../services/ReservasService.js';
 
 export const ToursController = {
     tours: [], // Store loaded tours locally
@@ -154,7 +155,7 @@ export const ToursController = {
         });
     },
 
-    addToCart: (tourId) => {
+    addToCart: async (tourId) => {
         const adults = document.getElementById(`adults-${tourId}`).value;
         const children = document.getElementById(`children-${tourId}`).value;
         const dateInput = document.getElementById(`date-${tourId}`);
@@ -166,12 +167,6 @@ export const ToursController = {
         }
 
         // Validate past dates
-        const selectedDate = new Date(date);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        // Add timezone offset correction if needed, but simple comparison usually works for local dates
-        // Ideally we compare YYYY-MM-DD strings to avoid timezone issues
         const selectedDateStr = date;
         const todayStr = new Date().toISOString().split('T')[0];
 
@@ -180,17 +175,76 @@ export const ToursController = {
             return;
         }
 
+        // Check if user is logged in
+        const user = JSON.parse(localStorage.getItem('user') || 'null');
+        if (!user) {
+            alert('Debes iniciar sesión para hacer una reserva.');
+            window.location.href = 'login.html';
+            return;
+        }
+
         // Find the tour object
         const tour = ToursController.tours.find(t => t.IdPaquete == tourId);
 
-        if (tour) {
-            CartService.addToCart(tour, adults, children, date);
-            if (confirm(`Added to cart: ${tour.Nombre} for ${date}\nDo you want to view your cart?`)) {
+        if (!tour) {
+            console.error('Tour not found:', tourId);
+            alert('Error al agregar al carrito. Por favor intenta de nuevo.');
+            return;
+        }
+
+        try {
+            // Show loading state
+            const btnReservar = event.target;
+            const originalText = btnReservar.innerHTML;
+            btnReservar.disabled = true;
+            btnReservar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+
+            // Create hold + reservation with PENDIENTE status
+            const totalPersonas = parseInt(adults) + parseInt(children);
+
+            const holdData = {
+                IdPaquete: tourId,
+                BookingUserId: user.Email,
+                FechaInicio: date,
+                Personas: totalPersonas,
+                DuracionHoldSegundos: 600 // 10 minutes
+            };
+
+            // Create hold (this will also create reservation with PENDIENTE status)
+            const holdResponse = await ReservasService.hold(holdData);
+            console.log('Hold created:', holdResponse);
+
+            // Now book the reservation (this confirms it)
+            const bookData = {
+                IdPaquete: tourId,
+                HoldId: holdResponse.HoldId,
+                BookingUserId: user.Email,
+                MetodoPago: 'Pendiente',
+                Turistas: [] // Will be filled later if needed
+            };
+
+            const reserva = await ReservasService.book(bookData);
+            console.log('Reservation created:', reserva);
+
+            // Add to cart with reservation ID
+            CartService.addToCart(tour, adults, children, date, reserva.IdReserva);
+
+            // Restore button
+            btnReservar.disabled = false;
+            btnReservar.innerHTML = originalText;
+
+            if (confirm(`Agregado al carrito: ${tour.Nombre} para ${date}\n¿Deseas ver tu carrito?`)) {
                 window.location.href = 'car.html';
             }
-        } else {
-            console.error('Tour not found:', tourId);
-            alert('Error adding to cart. Please try again.');
+        } catch (error) {
+            console.error('Error creating reservation:', error);
+            alert('Error al crear la reserva: ' + error.message);
+
+            // Restore button
+            if (event && event.target) {
+                event.target.disabled = false;
+                event.target.innerHTML = '<i class="bi bi-cart-plus"></i> Reservar';
+            }
         }
     },
 

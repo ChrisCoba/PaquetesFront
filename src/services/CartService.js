@@ -6,7 +6,7 @@ export const CartService = {
         return cart ? JSON.parse(cart) : [];
     },
 
-    addToCart: (tour, adults, children, date) => {
+    addToCart: (tour, adults, children, date, reservationId = null) => {
         const cart = CartService.getCart();
         const newItem = {
             tourId: tour.IdPaquete,
@@ -17,6 +17,7 @@ export const CartService = {
             adults: parseInt(adults),
             children: parseInt(children),
             date: date,
+            reservationId: reservationId, // Store reservation ID
             addedAt: new Date().toISOString()
         };
 

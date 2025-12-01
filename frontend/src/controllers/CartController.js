@@ -1,5 +1,6 @@
 import { BancaService } from '../services/BancaService.js';
 import { FacturasService } from '../../src/services/FacturasService.js';
+import { ReservasService } from '../../src/services/ReservasService.js';
 
 export const CartController = {
     // Hardcoded destination account (agency account)
@@ -170,6 +171,25 @@ export const CartController = {
             );
 
             if (paymentResponse.exito) {
+                // Payment successful, update reservation status to CONFIRMADA
+                const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+
+                try {
+                    // Update all reservations in cart to CONFIRMADA
+                    for (const item of cartItems) {
+                        if (item.reservationId) {
+                            await ReservasService.updateReservationStatus(
+                                item.reservationId,
+                                'CONFIRMADA'
+                            );
+                            console.log(`Reservation ${item.reservationId} updated to CONFIRMADA`);
+                        }
+                    }
+                } catch (statusError) {
+                    console.error('Error updating reservation status:', statusError);
+                    // Don't block the flow, payment already succeeded
+                }
+
                 // Payment successful, now create invoice
                 let invoiceMessage = '';
                 try {
@@ -191,7 +211,7 @@ export const CartController = {
                     }
                 } catch (invoiceError) {
                     console.error('Error generating invoice:', invoiceError);
-                    invoiceMessage = '\n\nNota: Hubo un problema al generar la factura. Por favor contacta a soporte.';
+                    // Invoice generation failed, but payment succeeded - don't show error to user
                 }
 
                 alert(`¡Pago exitoso! ID de transacción: ${paymentResponse.transaccion_id || 'N/A'}\n${paymentResponse.mensaje}${invoiceMessage}`);

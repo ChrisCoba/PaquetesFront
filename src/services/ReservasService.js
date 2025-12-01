@@ -37,6 +37,16 @@ const ReservasServiceRest = {
         const response = await fetch(`${adminUrl}/reservas/${id}/detalles`);
         if (!response.ok) throw new Error('Error fetching reservation details');
         return response.json();
+    },
+
+    async updateReservationStatus(reservationId, newStatus) {
+        const response = await fetch(`${API_BASE_URL}/reservas/${reservationId}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ estado: newStatus }),
+        });
+        if (!response.ok) throw new Error('Error updating reservation status');
+        return response.json();
     }
 };
 
@@ -101,5 +111,6 @@ export const ReservasService = {
     hold: (data) => USE_SOAP.value ? ReservasServiceSoap.hold(data) : ReservasServiceRest.hold(data),
     book: (data) => USE_SOAP.value ? ReservasServiceSoap.book(data) : ReservasServiceRest.book(data),
     getReservations: () => USE_SOAP.value ? ReservasServiceSoap.getReservations() : ReservasServiceRest.getReservations(),
-    getReservationDetails: (id) => ReservasServiceRest.getReservationDetails(id) // Always use REST for admin details for now
+    getReservationDetails: (id) => ReservasServiceRest.getReservationDetails(id), // Always use REST for admin details for now
+    updateReservationStatus: (reservationId, newStatus) => ReservasServiceRest.updateReservationStatus(reservationId, newStatus)
 };
