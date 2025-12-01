@@ -189,7 +189,7 @@ export const CartController = {
                 invoiceMsg = `\nFactura #${invoice.numero} generada.`;
             } catch (invErr) {
                 console.error("Invoice error:", invErr);
-                invoiceMsg = "\n(Error generando factura)";
+                // Don't show error to user, payment already succeeded
             }
 
             // Success

@@ -15,6 +15,8 @@ export const AdminController = {
     currentInvoicePage: 1,
     statusFilter: 'active', // 'all', 'active', 'inactive'
     searchTerm: '', // Search term
+    reservationSearchTerm: '', // Reservation search term
+    invoiceSearchTerm: '', // Invoice search term
     userToDeleteId: null, // Store ID for deletion confirmation
 
     init: () => {
@@ -589,11 +591,27 @@ export const AdminController = {
             }
 
             const reservations = await AdminService.getReservations();
+            // Sort by date (newest first)
+            reservations.sort((a, b) => new Date(b.FechaCreacion) - new Date(a.FechaCreacion));
+
             AdminController.allReservations = reservations;
             AdminController.currentReservationPage = 1; // Reset to first page on load
+            AdminController.setupReservationSearch();
             AdminController.renderReservationTable();
         } catch (error) {
             tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Error loading reservations: ${error.message}</td></tr>`;
+        }
+    },
+
+    setupReservationSearch: () => {
+        const searchInput = document.getElementById('reservation-search');
+        if (searchInput && !searchInput.dataset.initialized) {
+            searchInput.addEventListener('input', (e) => {
+                AdminController.reservationSearchTerm = e.target.value.toLowerCase();
+                AdminController.currentReservationPage = 1;
+                AdminController.renderReservationTable();
+            });
+            searchInput.dataset.initialized = 'true';
         }
     },
 
@@ -601,9 +619,21 @@ export const AdminController = {
         const tbody = document.querySelector('#reservation-manage-view tbody');
         tbody.innerHTML = '';
 
+        // Filter by search term
+        const filteredReservations = AdminController.allReservations.filter(res => {
+            if (!AdminController.reservationSearchTerm) return true;
+
+            const searchTerm = AdminController.reservationSearchTerm;
+            return (
+                (res.IdReserva && res.IdReserva.toString().includes(searchTerm)) ||
+                (res.CodigoReserva && res.CodigoReserva.toLowerCase().includes(searchTerm)) ||
+                (res.Estado && res.Estado.toLowerCase().includes(searchTerm))
+            );
+        });
+
         const startIndex = (AdminController.currentReservationPage - 1) * AdminController.itemsPerPage;
         const endIndex = startIndex + AdminController.itemsPerPage;
-        const reservationsToShow = AdminController.allReservations.slice(startIndex, endIndex);
+        const reservationsToShow = filteredReservations.slice(startIndex, endIndex);
 
         if (reservationsToShow.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7">No hay reservas registradas.</td></tr>';
@@ -750,11 +780,27 @@ export const AdminController = {
 
         try {
             const invoices = await AdminService.getInvoices();
+            // Sort by date (newest first)
+            invoices.sort((a, b) => new Date(b.FechaEmision) - new Date(a.FechaEmision));
+
             AdminController.allInvoices = invoices;
             AdminController.currentInvoicePage = 1; // Reset to first page
+            AdminController.setupInvoiceSearch();
             AdminController.renderInvoiceTable();
         } catch (error) {
             tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Error loading invoices: ${error.message}</td></tr>`;
+        }
+    },
+
+    setupInvoiceSearch: () => {
+        const searchInput = document.getElementById('invoice-search');
+        if (searchInput && !searchInput.dataset.initialized) {
+            searchInput.addEventListener('input', (e) => {
+                AdminController.invoiceSearchTerm = e.target.value.toLowerCase();
+                AdminController.currentInvoicePage = 1;
+                AdminController.renderInvoiceTable();
+            });
+            searchInput.dataset.initialized = 'true';
         }
     },
 
@@ -762,9 +808,21 @@ export const AdminController = {
         const tbody = document.querySelector('#payment-view-view tbody');
         tbody.innerHTML = '';
 
+        // Filter by search term
+        const filteredInvoices = AdminController.allInvoices.filter(inv => {
+            if (!AdminController.invoiceSearchTerm) return true;
+
+            const searchTerm = AdminController.invoiceSearchTerm;
+            return (
+                (inv.IdFactura && inv.IdFactura.toString().includes(searchTerm)) ||
+                (inv.ReservaId && inv.ReservaId.toString().includes(searchTerm)) ||
+                (inv.NumeroFactura && inv.NumeroFactura.toLowerCase().includes(searchTerm))
+            );
+        });
+
         const startIndex = (AdminController.currentInvoicePage - 1) * AdminController.itemsPerPage;
         const endIndex = startIndex + AdminController.itemsPerPage;
-        const invoicesToShow = AdminController.allInvoices.slice(startIndex, endIndex);
+        const invoicesToShow = filteredInvoices.slice(startIndex, endIndex);
 
         if (invoicesToShow.length === 0) {
             tbody.innerHTML = '<tr><td colspan="6">No hay facturas registradas.</td></tr>';
