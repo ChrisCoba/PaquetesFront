@@ -147,9 +147,21 @@ export const UserController = {
                 </div>
                 <p class="mb-1"><strong>Total:</strong> $${parseFloat(reserva.Total).toFixed(2)}</p>
                 <p class="mb-1"><strong>Estado:</strong> ${reserva.Estado || 'Pendiente'}</p>
-                <small>ID de Reserva: ${reserva.IdReserva}</small>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small>ID: ${reserva.IdReserva}</small>
+                    <button class="btn btn-sm btn-outline-primary btn-details" data-type="reserva" data-id="${reserva.IdReserva}">Ver Detalles</button>
+                </div>
             </div>
         `).join('');
+
+        // Add event listeners
+        container.querySelectorAll('.btn-details').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                const reserva = reservas.find(r => r.IdReserva == id);
+                if (reserva) UserController.showDetailsModal('Detalles de Reserva', reserva.Detalles);
+            });
+        });
     },
 
     loadUserInvoices: async () => {
@@ -162,7 +174,6 @@ export const UserController = {
             console.log('All invoices fetched:', facturas.length);
 
             // Filter invoices by user email
-            // Assuming facturas have ClienteEmail or similar
             const userFacturas = facturas.filter(f =>
                 (f.ClienteEmail && f.ClienteEmail.toLowerCase() === user.Email.toLowerCase()) ||
                 (f.Email && f.Email.toLowerCase() === user.Email.toLowerCase())
@@ -181,7 +192,7 @@ export const UserController = {
         if (!tbody) return;
 
         if (facturas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="4" class="text-center">No tienes facturas aún.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No tienes facturas aún.</td></tr>';
             return;
         }
 
@@ -189,10 +200,74 @@ export const UserController = {
             <tr>
                 <td>${new Date(factura.FechaEmision).toLocaleDateString('es-ES')}</td>
                 <td>Factura ${factura.NumeroFactura}</td>
-                <td>$${factura.Total.toFixed(2)}</td>
+                <td>$${parseFloat(factura.Total).toFixed(2)}</td>
                 <td><span class="badge bg-success">Pagado</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-info btn-details-invoice" data-id="${factura.IdFactura}">Ver Detalles</button>
+                </td>
             </tr>
         `).join('');
+
+        // Add event listeners
+        tbody.querySelectorAll('.btn-details-invoice').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = btn.getAttribute('data-id');
+                const factura = facturas.find(f => f.IdFactura == id);
+                if (factura) UserController.showDetailsModal('Detalles de Factura', factura.Detalles);
+            });
+        });
+    },
+
+    showDetailsModal: (title, detalles) => {
+        // Remove existing modal if any
+        const existingModal = document.getElementById('detailsModal');
+        if (existingModal) existingModal.remove();
+
+        const modalHtml = `
+            <div class="modal fade" id="detailsModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Servicio ID</th>
+                                            <th>Cantidad</th>
+                                            <th>Precio Unit.</th>
+                                            <th>Subtotal</th>
+                                            <th>Fechas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${detalles && detalles.length > 0 ? detalles.map(d => `
+                                            <tr>
+                                                <td>${d.ServicioId}</td>
+                                                <td>${d.Cantidad}</td>
+                                                <td>$${parseFloat(d.PrecioUnitario).toFixed(2)}</td>
+                                                <td>$${parseFloat(d.Subtotal).toFixed(2)}</td>
+                                                <td>${new Date(d.FechaInicio).toLocaleDateString()} - ${new Date(d.FechaFin).toLocaleDateString()}</td>
+                                            </tr>
+                                        `).join('') : '<tr><td colspan="5" class="text-center">No hay detalles disponibles</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = new bootstrap.Modal(document.getElementById('detailsModal'));
+        modal.show();
     }
 };
 

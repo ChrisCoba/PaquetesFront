@@ -601,7 +601,7 @@ export const AdminController = {
         const reservationsToShow = AdminController.allReservations.slice(startIndex, endIndex);
 
         if (reservationsToShow.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6">No hay reservas registradas.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7">No hay reservas registradas.</td></tr>';
             return;
         }
 
@@ -609,15 +609,25 @@ export const AdminController = {
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${res.IdReserva}</td>
-                <td>${res.ClienteNombre}</td>
+                <td>${res.ClienteNombre || 'N/A'}</td>
                 <td>${new Date(res.FechaCreacion).toLocaleDateString()}</td>
                 <td>${res.Estado || 'Pendiente'}</td>
                 <td>$${res.Total}</td>
                 <td>
+                    <button class="btn btn-sm btn-info btn-details-res" data-id="${res.IdReserva}">Detalles</button>
                     ${res.Estado !== 'Cancelada' ? `<button class="btn btn-sm btn-danger btn-cancel-res" data-id="${res.IdReserva}">Cancelar</button>` : ''}
                 </td>
             `;
             tbody.appendChild(tr);
+        });
+
+        // Add event listeners for details buttons
+        document.querySelectorAll('.btn-details-res').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const reserva = AdminController.allReservations.find(r => r.IdReserva == id);
+                if (reserva) AdminController.showDetailsModal('Detalles de Reserva', reserva.Detalles);
+            });
         });
 
         // Add event listeners for cancel buttons
@@ -693,7 +703,7 @@ export const AdminController = {
     loadInvoices: async () => {
         const tbody = document.querySelector('#payment-view-view tbody');
         if (!tbody) return;
-        tbody.innerHTML = '<tr><td colspan="5">Cargando...</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6">Cargando...</td></tr>';
 
         try {
             const invoices = await AdminService.getInvoices();
@@ -701,7 +711,7 @@ export const AdminController = {
             AdminController.currentInvoicePage = 1; // Reset to first page
             AdminController.renderInvoiceTable();
         } catch (error) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-danger">Error loading invoices: ${error.message}</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" class="text-danger">Error loading invoices: ${error.message}</td></tr>`;
         }
     },
 
@@ -714,7 +724,7 @@ export const AdminController = {
         const invoicesToShow = AdminController.allInvoices.slice(startIndex, endIndex);
 
         if (invoicesToShow.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5">No hay facturas registradas.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6">No hay facturas registradas.</td></tr>';
             return;
         }
 
@@ -726,8 +736,20 @@ export const AdminController = {
                 <td>${new Date(inv.FechaEmision).toLocaleDateString()}</td>
                 <td>$${inv.Total}</td>
                 <td><span class="badge bg-success">Pagado</span></td>
+                <td>
+                    <button class="btn btn-sm btn-info btn-details-inv" data-id="${inv.IdFactura}">Detalles</button>
+                </td>
             `;
             tbody.appendChild(tr);
+        });
+
+        // Add event listeners for details buttons
+        document.querySelectorAll('.btn-details-inv').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const factura = AdminController.allInvoices.find(f => f.IdFactura == id);
+                if (factura) AdminController.showDetailsModal('Detalles de Factura', factura.Detalles);
+            });
         });
 
         AdminController.renderInvoicePagination();
@@ -780,6 +802,58 @@ export const AdminController = {
             }
         };
         paginationContainer.appendChild(nextLi);
+    },
+
+    showDetailsModal: (title, detalles) => {
+        // Remove existing modal if any
+        const existingModal = document.getElementById('adminDetailsModal');
+        if (existingModal) existingModal.remove();
+
+        const modalHtml = `
+            <div class="modal fade" id="adminDetailsModal" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">${title}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Servicio ID</th>
+                                            <th>Cantidad</th>
+                                            <th>Precio Unit.</th>
+                                            <th>Subtotal</th>
+                                            <th>Fechas</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${detalles && detalles.length > 0 ? detalles.map(d => `
+                                            <tr>
+                                                <td>${d.ServicioId}</td>
+                                                <td>${d.Cantidad}</td>
+                                                <td>$${parseFloat(d.PrecioUnitario).toFixed(2)}</td>
+                                                <td>$${parseFloat(d.Subtotal).toFixed(2)}</td>
+                                                <td>${new Date(d.FechaInicio).toLocaleDateString()} - ${new Date(d.FechaFin).toLocaleDateString()}</td>
+                                            </tr>
+                                        `).join('') : '<tr><td colspan="5" class="text-center">No hay detalles disponibles</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+        const modal = new bootstrap.Modal(document.getElementById('adminDetailsModal'));
+        modal.show();
     }
 };
 
