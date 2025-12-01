@@ -583,6 +583,11 @@ export const AdminController = {
         tbody.innerHTML = '<tr><td colspan="6">Cargando...</td></tr>';
 
         try {
+            // Ensure users are loaded for the join
+            if (AdminController.allUsers.length === 0) {
+                await AdminController.loadUsers();
+            }
+
             const reservations = await AdminService.getReservations();
             AdminController.allReservations = reservations;
             AdminController.currentReservationPage = 1; // Reset to first page on load
@@ -606,11 +611,24 @@ export const AdminController = {
         }
 
         reservationsToShow.forEach(res => {
-            // Find user by ClienteId (assuming ClienteId maps to User Id as per user request)
-            // Note: The user said "check the ClienteId and make a join with the [usuarios list]"
-            // We'll try to find a user where user.Id == res.ClienteId
-            const user = AdminController.allUsers.find(u => (u.Id || u.IdUsuario) == res.ClienteId);
-            const contactInfo = user ? `${user.Nombre} ${user.Apellido} (${user.Email})` : 'N/A';
+            let contactInfo = 'N/A';
+
+            // Check if this is an internal user reservation (has UsuarioId)
+            if (res.UsuarioId) {
+                const user = AdminController.allUsers.find(u => {
+                    const userId = u.Id || u.IdUsuario;
+                    return userId && userId.toString() === res.UsuarioId.toString();
+                });
+                if (user) {
+                    contactInfo = `${user.Nombre} ${user.Apellido} (${user.Email})`;
+                }
+            }
+            // Check if this is an external client reservation (has ClienteId but no UsuarioId)
+            else if (res.ClienteId) {
+                // For external bookings, just show Cliente ID for now
+                // You can expand this later by creating a client list API
+                contactInfo = `Cliente Externo (ID: ${res.ClienteId})`;
+            }
 
             const tr = document.createElement('tr');
             tr.innerHTML = `

@@ -114,21 +114,16 @@ export const UserController = {
             const reservas = await ReservasService.getReservations();
             console.log('All reservations fetched:', reservas.length);
 
-            // Filter reservations by user ID or ClienteId
-            // User requested "show all the reservations", implying some were hidden.
-            // Since we removed ClienteEmail from API, we must rely on IDs.
+            // Filter reservations by UsuarioId ONLY (internal website users)
+            // External bookings (with ClienteId but no UsuarioId) should NOT appear here
             const userId = user.Id || user.IdUsuario;
 
-            // We assume the user sees ALL reservations where they are the client.
-            // If the user meant "show ALL reservations in the system", that would be an admin feature.
-            // Assuming they mean "all of MY reservations".
             const userReservas = reservas.filter(r =>
-                (r.UsuarioId && userId && r.UsuarioId.toString() === userId.toString()) ||
-                (r.ClienteId && userId && r.ClienteId.toString() === userId.toString())
+                r.UsuarioId && userId && r.UsuarioId.toString() === userId.toString()
             );
-            console.log('Filtered reservations for user:', userReservas.length);
+            console.log('Filtered reservations for user (by UsuarioId):', userReservas.length);
 
-            // Sort by date descending (newest first) but show ALL
+            // Sort by date descending (newest first)
             userReservas.sort((a, b) => new Date(b.FechaCreacion) - new Date(a.FechaCreacion));
 
             UserController.renderReservations(userReservas);
