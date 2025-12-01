@@ -165,10 +165,15 @@ export const AuthController = {
             submitBtn.disabled = true;
             submitBtn.textContent = 'Iniciando sesión...';
 
-            await AuthService.login({ email, password });
+            const user = await AuthService.login({ email, password });
 
             alert('¡Bienvenido!');
-            window.location.href = '../index.html';
+
+            if (user.EsAdmin) {
+                window.location.href = 'admin.html';
+            } else {
+                window.location.href = '../index.html';
+            }
         } catch (error) {
             console.error(error);
             alert('Error al iniciar sesión: ' + error.message);

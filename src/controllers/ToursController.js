@@ -113,6 +113,11 @@ export const ToursController = {
                                 <span><i class="bi bi-geo-alt"></i> ${tour.Ciudad}</span>
                             </div>
                             
+                            <div class="mb-3">
+                                <label class="form-label small mb-1">Fecha de Reserva</label>
+                                <input type="date" class="form-control form-control-sm" id="date-${tour.IdPaquete}" min="${new Date().toISOString().split('T')[0]}">
+                            </div>
+
                             <div class="row mb-3">
                                 <div class="col-6">
                                     <div class="form-group">
@@ -152,13 +157,35 @@ export const ToursController = {
     addToCart: (tourId) => {
         const adults = document.getElementById(`adults-${tourId}`).value;
         const children = document.getElementById(`children-${tourId}`).value;
+        const dateInput = document.getElementById(`date-${tourId}`);
+        const date = dateInput ? dateInput.value : null;
+
+        if (!date) {
+            alert('Por favor selecciona una fecha para tu reserva.');
+            return;
+        }
+
+        // Validate past dates
+        const selectedDate = new Date(date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        // Add timezone offset correction if needed, but simple comparison usually works for local dates
+        // Ideally we compare YYYY-MM-DD strings to avoid timezone issues
+        const selectedDateStr = date;
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        if (selectedDateStr < todayStr) {
+            alert('No puedes seleccionar una fecha pasada.');
+            return;
+        }
 
         // Find the tour object
         const tour = ToursController.tours.find(t => t.IdPaquete == tourId);
 
         if (tour) {
-            CartService.addToCart(tour, adults, children);
-            if (confirm(`Added to cart: ${tour.Nombre}\nDo you want to view your cart?`)) {
+            CartService.addToCart(tour, adults, children, date);
+            if (confirm(`Added to cart: ${tour.Nombre} for ${date}\nDo you want to view your cart?`)) {
                 window.location.href = 'car.html';
             }
         } else {

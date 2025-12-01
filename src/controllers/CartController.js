@@ -44,6 +44,7 @@ export const CartController = {
                         <div>
                             <h5 class="mb-0">${item.name}</h5>
                             <small class="text-muted">${item.duration} Días</small>
+                            <small class="text-muted d-block">Fecha: ${item.date || 'N/A'}</small>
                             <div class="small">
                                 <span>Adultos: ${item.adults}</span> | 
                                 <span>Niños: ${item.children}</span>
@@ -125,7 +126,7 @@ export const CartController = {
                 const holdPayload = {
                     IdPaquete: item.tourId,
                     BookingUserId: bookingUserId,
-                    FechaInicio: today,
+                    FechaInicio: item.date || today,
                     Personas: totalPersonas,
                     DuracionHoldSegundos: 100
                 };
