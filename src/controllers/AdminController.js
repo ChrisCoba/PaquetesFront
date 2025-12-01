@@ -623,10 +623,29 @@ export const AdminController = {
 
         // Add event listeners for details buttons
         document.querySelectorAll('.btn-details-res').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            btn.addEventListener('click', async (e) => {
                 const id = e.target.getAttribute('data-id');
-                const reserva = AdminController.allReservations.find(r => r.IdReserva == id);
-                if (reserva) AdminController.showDetailsModal('Detalles de Reserva', reserva.Detalles);
+                const btnElem = e.target;
+
+                try {
+                    btnElem.disabled = true;
+                    btnElem.textContent = 'Cargando...';
+
+                    // Use the ReservasService to get details (which uses the Admin API)
+                    // We need to import ReservasService if not already imported, or use AdminService if we add it there
+                    // Since ReservasService already has the logic, let's use it.
+                    // But first, let's check imports.
+                    // Assuming ReservasService is available or we add the method to AdminService.
+                    // Let's add getReservationDetails to AdminService to keep it clean.
+                    const detalles = await AdminService.getReservationDetails(id);
+                    AdminController.showDetailsModal('Detalles de Reserva', detalles);
+                } catch (error) {
+                    console.error('Error loading details:', error);
+                    alert('Error al cargar los detalles de la reserva');
+                } finally {
+                    btnElem.disabled = false;
+                    btnElem.textContent = 'Detalles';
+                }
             });
         });
 

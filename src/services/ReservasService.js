@@ -29,6 +29,14 @@ const ReservasServiceRest = {
         const response = await fetch(`${API_BASE_URL}/reservas`);
         if (!response.ok) throw new Error('Error fetching reservations');
         return response.json();
+    },
+
+    async getReservationDetails(id) {
+        // Construct Admin URL manually since API_BASE_URL points to integracion
+        const adminUrl = API_BASE_URL.replace('integracion', 'admin');
+        const response = await fetch(`${adminUrl}/reservas/${id}/detalles`);
+        if (!response.ok) throw new Error('Error fetching reservation details');
+        return response.json();
     }
 };
 
@@ -92,5 +100,6 @@ const ReservasServiceSoap = {
 export const ReservasService = {
     hold: (data) => USE_SOAP.value ? ReservasServiceSoap.hold(data) : ReservasServiceRest.hold(data),
     book: (data) => USE_SOAP.value ? ReservasServiceSoap.book(data) : ReservasServiceRest.book(data),
-    getReservations: () => USE_SOAP.value ? ReservasServiceSoap.getReservations() : ReservasServiceRest.getReservations()
+    getReservations: () => USE_SOAP.value ? ReservasServiceSoap.getReservations() : ReservasServiceRest.getReservations(),
+    getReservationDetails: (id) => ReservasServiceRest.getReservationDetails(id) // Always use REST for admin details for now
 };

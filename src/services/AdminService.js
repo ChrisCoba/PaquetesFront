@@ -143,6 +143,19 @@ export const AdminService = {
         }
     },
 
+    getReservationDetails: async (id) => {
+        try {
+            // Construct Admin URL manually since API_BASE_URL points to integracion
+            const adminUrl = API_BASE_URL.replace('integracion', 'admin');
+            const response = await fetch(`${adminUrl}/reservas/${id}/detalles`);
+            if (!response.ok) throw new Error('Error al obtener detalles de la reserva');
+            return await response.json();
+        } catch (error) {
+            console.error('AdminService.getReservationDetails error:', error);
+            throw error;
+        }
+    },
+
     updateReservation: async (id, reservationData) => {
         try {
             const response = await fetch(`${API_BASE_URL}/reservas/${id}`, {

@@ -158,10 +158,23 @@ export const UserController = {
 
         // Add event listeners
         container.querySelectorAll('.btn-details').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => {
                 const id = btn.getAttribute('data-id');
-                const reserva = reservas.find(r => r.IdReserva == id);
-                if (reserva) UserController.showDetailsModal('Detalles de Reserva', reserva.Detalles);
+                const btnElem = btn;
+
+                try {
+                    btnElem.disabled = true;
+                    btnElem.textContent = 'Cargando...';
+
+                    const detalles = await ReservasService.getReservationDetails(id);
+                    UserController.showDetailsModal('Detalles de Reserva', detalles);
+                } catch (error) {
+                    console.error('Error loading details:', error);
+                    alert('Error al cargar los detalles de la reserva');
+                } finally {
+                    btnElem.disabled = false;
+                    btnElem.textContent = 'Ver Detalles';
+                }
             });
         });
     },
