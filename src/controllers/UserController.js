@@ -148,7 +148,7 @@ export const UserController = {
                 <p class="mb-1"><strong>Total:</strong> $${parseFloat(reserva.Total).toFixed(2)}</p>
                 <p class="mb-1"><strong>Estado:</strong> ${reserva.Estado || 'Pendiente'}</p>
                 <div class="d-flex justify-content-between align-items-center">
-                    <small>ID: ${reserva.IdReserva}</small>
+                    <small>ID: ${reserva.IdReserva} ${reserva.UsuarioId ? `| User: ${reserva.UsuarioId}` : ''}</small>
                     <button class="btn btn-sm btn-outline-primary btn-details" data-type="reserva" data-id="${reserva.IdReserva}">Ver Detalles</button>
                 </div>
             </div>
