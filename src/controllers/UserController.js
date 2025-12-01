@@ -114,16 +114,22 @@ export const UserController = {
             const reservas = await ReservasService.getReservations();
             console.log('All reservations fetched:', reservas.length);
 
-            // Filter reservations by user email, ID, or ClienteId
+            // Filter reservations by user ID or ClienteId
+            // User requested "show all the reservations", implying some were hidden.
+            // Since we removed ClienteEmail from API, we must rely on IDs.
             const userId = user.Id || user.IdUsuario;
 
+            // We assume the user sees ALL reservations where they are the client.
+            // If the user meant "show ALL reservations in the system", that would be an admin feature.
+            // Assuming they mean "all of MY reservations".
             const userReservas = reservas.filter(r =>
-                (r.ClienteEmail && r.ClienteEmail.toLowerCase() === user.Email.toLowerCase()) ||
-                (r.Email && r.Email.toLowerCase() === user.Email.toLowerCase()) ||
                 (r.UsuarioId && userId && r.UsuarioId.toString() === userId.toString()) ||
                 (r.ClienteId && userId && r.ClienteId.toString() === userId.toString())
             );
             console.log('Filtered reservations for user:', userReservas.length);
+
+            // Sort by date descending (newest first) but show ALL
+            userReservas.sort((a, b) => new Date(b.FechaCreacion) - new Date(a.FechaCreacion));
 
             UserController.renderReservations(userReservas);
         } catch (error) {
@@ -144,7 +150,7 @@ export const UserController = {
         container.innerHTML = reservas.map(reserva => `
             <div class="list-group-item">
                 <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">Reserva ${reserva.Codigo || reserva.IdReserva}</h5>
+                    <h5 class="mb-1">Reserva ${reserva.CodigoReserva || reserva.IdReserva}</h5>
                     <small>${new Date(reserva.FechaCreacion).toLocaleDateString('es-ES')}</small>
                 </div>
                 <p class="mb-1"><strong>Total:</strong> $${parseFloat(reserva.Total).toFixed(2)}</p>

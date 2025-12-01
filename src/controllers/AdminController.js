@@ -606,10 +606,16 @@ export const AdminController = {
         }
 
         reservationsToShow.forEach(res => {
+            // Find user by ClienteId (assuming ClienteId maps to User Id as per user request)
+            // Note: The user said "check the ClienteId and make a join with the [usuarios list]"
+            // We'll try to find a user where user.Id == res.ClienteId
+            const user = AdminController.allUsers.find(u => (u.Id || u.IdUsuario) == res.ClienteId);
+            const contactInfo = user ? `${user.Nombre} ${user.Apellido} (${user.Email})` : 'N/A';
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td>${res.IdReserva}</td>
-                <td>${res.ClienteNombre || 'N/A'}</td>
+                <td>${contactInfo}</td>
                 <td>${new Date(res.FechaCreacion).toLocaleDateString()}</td>
                 <td>${res.Estado || 'Pendiente'}</td>
                 <td>$${res.Total}</td>
