@@ -21,6 +21,7 @@ export const SoapClient = {
             });
 
             const text = await response.text();
+            console.log(`SOAP ${action} raw XML response:`, text);
 
             if (!response.ok) {
                 throw new Error(`SOAP Error: ${response.status} - ${text}`);
