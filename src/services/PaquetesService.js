@@ -47,7 +47,34 @@ const PaquetesServiceSoap = {
             tipoActividad: params.tipoActividad || '',
             precioMax: params.precioMax || 0
         };
-        return await SoapClient.call('BuscarPaquetes', soapParams);
+
+        const result = await SoapClient.call('BuscarPaquetes', soapParams);
+        console.log('SOAP BuscarPaquetes raw result:', result);
+
+        // SOAP XML parser returns different structure than REST JSON
+        // Need to normalize to array format: [{tour1}, {tour2}, ...]
+
+        if (!result) {
+            console.log('SOAP returned null/undefined');
+            return [];
+        }
+
+        // Try different possible structures from XML parsing
+        let packages = result.PaqueteSoap || result.ArrayOfPaqueteSoap || result;
+
+        // If it's wrapped in another object, try to extract array
+        if (packages && typeof packages === 'object' && !Array.isArray(packages)) {
+            // Check for common XML array wrapper patterns
+            packages = packages.PaqueteSoap || packages.item || packages;
+        }
+
+        // Ensure it's an array
+        if (!Array.isArray(packages)) {
+            packages = packages ? [packages] : [];
+        }
+
+        console.log('SOAP normalized packages (array):', packages);
+        return packages;
     },
 
     async create(data) {
