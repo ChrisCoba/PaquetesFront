@@ -2,14 +2,26 @@
 import { AuthService } from '../services/AuthService.js';
 import { USE_SOAP } from '../services/config.js';
 
+// Load saved SOAP preference from localStorage
+const savedSoapPreference = localStorage.getItem('USE_SOAP');
+if (savedSoapPreference !== null) {
+  USE_SOAP.value = savedSoapPreference === 'true';
+  console.log('Loaded SOAP preference:', USE_SOAP.value ? 'SOAP' : 'REST');
+}
+
 // Expose AuthService for inline onclick handlers
 window.AuthService = AuthService;
 
 // Expose toggleSoap for inline onchange handler
 window.toggleSoap = function (checkbox) {
   USE_SOAP.value = checkbox.checked;
-  console.log('Protocol switched to:', USE_SOAP.value ? 'SOAP' : 'REST');
-  alert(`Protocolo cambiado a ${USE_SOAP.value ? 'SOAP' : 'REST'}`);
+  localStorage.setItem('USE_SOAP', checkbox.checked);
+  console.log('Protocol switching to:', USE_SOAP.value ? 'SOAP' : 'REST');
+
+  // Reload page to reinitialize modules with new value
+  setTimeout(() => {
+    location.reload();
+  }, 300); // Small delay so user sees the switch toggle
 };
 
 // Flag to prevent multiple executions
@@ -112,7 +124,7 @@ export function renderLayout() {
         <div class="col-lg-2 col-md-12 footer-links">
           <h4>Configuración</h4>
           <div class="form-check form-switch">
-              <input class="form-check-input" type="checkbox" id="soapSwitch" onchange="toggleSoap(this)">
+              <input class="form-check-input" type="checkbox" id="soapSwitch" ${USE_SOAP.value ? 'checked' : ''} onchange="toggleSoap(this)">
               <label class="form-check-label" for="soapSwitch" style="color: white;">Usar SOAP</label>
           </div>
         </div>
