@@ -195,34 +195,35 @@ export const UserController = {
     },
 
     renderInvoices: (facturas) => {
-        const tbody = document.querySelector('#v-pills-payments tbody');
-        if (!tbody) return;
+        console.log('renderInvoices called with:', facturas);
+        const container = document.querySelector('#v-pills-payments .list-group');
+        console.log('Invoices container found:', container);
 
-        if (facturas.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="5" class="text-center">No tienes facturas aún.</td></tr>';
+        if (!container) {
+            console.error('Container #v-pills-payments .list-group not found!');
             return;
         }
 
-        tbody.innerHTML = facturas.map(factura => `
-            <tr>
-                <td>${new Date(factura.FechaEmision).toLocaleDateString('es-ES')}</td>
-                <td>Factura ${factura.NumeroFactura}</td>
-                <td>$${parseFloat(factura.Total).toFixed(2)}</td>
-                <td><span class="badge bg-success">Pagado</span></td>
-                <td>
-                    <button class="btn btn-sm btn-outline-info btn-details-invoice" data-id="${factura.IdFactura}">Ver Detalles</button>
-                </td>
-            </tr>
+        if (!facturas || facturas.length === 0) {
+            container.innerHTML = '<div class="alert alert-info">No tienes facturas aún.</div>';
+            return;
+        }
+
+        const html = facturas.map(factura => `
+            <div class="list-group-item">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">Factura ${factura.Numero || factura.NumeroFactura}</h5>
+                    <small>${new Date(factura.FechaEmision).toLocaleDateString('es-ES')}</small>
+                </div>
+                <p class="mb-1"><strong>Total:</strong> $${parseFloat(factura.Total).toFixed(2)}</p>
+                <p class="mb-1"><strong>Estado:</strong> <span class="badge bg-success">Pagado</span></p>
+                <small>ID: ${factura.IdFactura}</small>
+            </div>
         `).join('');
 
-        // Add event listeners
-        tbody.querySelectorAll('.btn-details-invoice').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = btn.getAttribute('data-id');
-                const factura = facturas.find(f => f.IdFactura == id);
-                if (factura) UserController.showDetailsModal('Detalles de Factura', factura.Detalles);
-            });
-        });
+        console.log('Generated invoices HTML:', html);
+        container.innerHTML = html;
+        console.log('Invoices HTML set to container');
     },
 
     showDetailsModal: (title, detalles) => {
