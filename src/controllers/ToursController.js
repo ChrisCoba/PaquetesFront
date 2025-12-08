@@ -214,30 +214,11 @@ export const ToursController = {
             const holdResponse = await ReservasService.hold(holdData);
             console.log('Hold created:', holdResponse);
 
-            // Mostrar información de cupos disponibles con badge y emojis
+            // Mostrar información de cupos disponibles
             let availabilityMsg = '';
-            let urgencyIcon = '';
-
             if (holdResponse.CuposDisponibles !== undefined && holdResponse.CuposDisponibles !== null) {
-                const cuposDisponibles = holdResponse.CuposDisponibles;
-                console.log(`✓ Hold creado. Cupos disponibles: ${cuposDisponibles}`);
-
-                if (cuposDisponibles <= 0) {
-                    urgencyIcon = '🔴';
-                    availabilityMsg = `\n\n${urgencyIcon} ¡ÚLTIMA PLAZA RESERVADA! No quedan más cupos.`;
-                } else if (cuposDisponibles <= 3) {
-                    urgencyIcon = '🔴';
-                    availabilityMsg = `\n\n${urgencyIcon} ¡ÚLTIMAS ${cuposDisponibles} PLAZAS DISPONIBLES!`;
-                } else if (cuposDisponibles <= 5) {
-                    urgencyIcon = '🟠';
-                    availabilityMsg = `\n\n${urgencyIcon} ¡Quedan solo ${cuposDisponibles} cupos disponibles!`;
-                } else if (cuposDisponibles <= 10) {
-                    urgencyIcon = '🟡';
-                    availabilityMsg = `\n\n${urgencyIcon} ${cuposDisponibles} cupos disponibles para esta fecha`;
-                } else {
-                    urgencyIcon = '✅';
-                    availabilityMsg = `\n\n${urgencyIcon} ${cuposDisponibles} cupos disponibles`;
-                }
+                console.log(`✓ Hold creado. Cupos disponibles: ${holdResponse.CuposDisponibles}`);
+                availabilityMsg = `\n\nCupos disponibles para esta fecha: ${holdResponse.CuposDisponibles}`;
             }
 
             // Now book the reservation (this confirms it)
@@ -259,7 +240,7 @@ export const ToursController = {
             btnReservar.disabled = false;
             btnReservar.innerHTML = originalText;
 
-            if (confirm(`✅ Agregado al carrito: ${tour.Nombre} para ${date}${availabilityMsg}\n\n¿Deseas ver tu carrito?`)) {
+            if (confirm(`Agregado al carrito: ${tour.Nombre} para ${date}${availabilityMsg}\n¿Deseas ver tu carrito?`)) {
                 window.location.href = 'car.html';
             }
         } catch (error) {

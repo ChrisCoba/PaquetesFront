@@ -31,6 +31,12 @@ const ReservasServiceRest = {
         return response.json();
     },
 
+    async getReservationsByUser(userId) {
+        const response = await fetch(`${API_BASE_URL}/reservas/usuario/${userId}`);
+        if (!response.ok) throw new Error('Error fetching user reservations');
+        return response.json();
+    },
+
     async getReservationDetails(id) {
         // Construct Admin URL manually since API_BASE_URL points to integracion
         const adminUrl = API_BASE_URL.replace('integracion', 'admin');

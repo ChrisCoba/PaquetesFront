@@ -110,18 +110,20 @@ export const UserController = {
         if (!user) return;
 
         try {
-            console.log('Loading reservations for user:', user.Email);
-            const reservas = await ReservasService.getReservations();
-            console.log('All reservations fetched:', reservas.length);
-
-            // Filter reservations by UsuarioId ONLY (internal website users)
-            // External bookings (with ClienteId but no UsuarioId) should NOT appear here
+            // Usar ID o IdUsuario dependiendo de qué campo esté disponible
             const userId = user.Id || user.IdUsuario;
 
-            const userReservas = reservas.filter(r =>
-                r.UsuarioId && userId && r.UsuarioId.toString() === userId.toString()
-            );
-            console.log('Filtered reservations for user (by UsuarioId):', userReservas.length);
+            if (!userId) {
+                console.error('User ID not found');
+                UserController.renderReservations([]);
+                return;
+            }
+
+            console.log('Loading reservations for user ID:', userId);
+
+            // Usar el nuevo endpoint que filtra por usuario en el backend
+            const userReservas = await ReservasService.getReservationsByUser(userId);
+            console.log('Reservations fetched for user:', userReservas.length);
 
             // Sort by date descending (newest first)
             userReservas.sort((a, b) => new Date(b.FechaCreacion) - new Date(a.FechaCreacion));
@@ -185,20 +187,20 @@ export const UserController = {
         if (!user) return;
 
         try {
-            console.log('Loading invoices for user:', user.Email);
-            const facturas = await FacturasService.getInvoices();
-            console.log('All invoices fetched:', facturas.length);
-
-            // Filter invoices by user email, ID, or ClienteId
+            // Usar ID o IdUsuario dependiendo de qué campo esté disponible
             const userId = user.Id || user.IdUsuario;
 
-            const userFacturas = facturas.filter(f =>
-                (f.ClienteEmail && f.ClienteEmail.toLowerCase() === user.Email.toLowerCase()) ||
-                (f.Email && f.Email.toLowerCase() === user.Email.toLowerCase()) ||
-                (f.UsuarioId && userId && f.UsuarioId.toString() === userId.toString()) ||
-                (f.ClienteId && userId && f.ClienteId.toString() === userId.toString())
-            );
-            console.log('Filtered invoices for user:', userFacturas.length);
+            if (!userId) {
+                console.error('User ID not found');
+                UserController.renderInvoices([]);
+                return;
+            }
+
+            console.log('Loading invoices for user ID:', userId);
+
+            // Usar el nuevo endpoint que filtra por usuario en el backend
+            const userFacturas = await FacturasService.getInvoicesByUser(userId);
+            console.log('Invoices fetched for user:', userFacturas.length);
 
             UserController.renderInvoices(userFacturas);
         } catch (error) {
