@@ -152,34 +152,9 @@ export const UserController = {
                 </div>
                 <p class="mb-1"><strong>Total:</strong> $${parseFloat(reserva.Total).toFixed(2)}</p>
                 <p class="mb-1"><strong>Estado:</strong> ${reserva.Estado || 'Pendiente'}</p>
-                <div class="d-flex justify-content-between align-items-center">
-                    <small>ID: ${reserva.IdReserva}</small>
-                    <button class="btn btn-sm btn-outline-primary btn-details" data-type="reserva" data-id="${reserva.IdReserva}">Ver Detalles</button>
-                </div>
+                <small>ID: ${reserva.IdReserva}</small>
             </div>
         `).join('');
-
-        // Add event listeners
-        container.querySelectorAll('.btn-details').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const id = btn.getAttribute('data-id');
-                const btnElem = btn;
-
-                try {
-                    btnElem.disabled = true;
-                    btnElem.textContent = 'Cargando...';
-
-                    const detalles = await ReservasService.getReservationDetails(id);
-                    UserController.showDetailsModal('Detalles de Reserva', detalles);
-                } catch (error) {
-                    console.error('Error loading details:', error);
-                    alert('Error al cargar los detalles de la reserva');
-                } finally {
-                    btnElem.disabled = false;
-                    btnElem.textContent = 'Ver Detalles';
-                }
-            });
-        });
     },
 
     loadUserInvoices: async () => {
