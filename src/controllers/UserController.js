@@ -136,15 +136,21 @@ export const UserController = {
     },
 
     renderReservations: (reservas) => {
+        console.log('renderReservations called with:', reservas);
         const container = document.querySelector('#v-pills-reservations .list-group');
-        if (!container) return;
+        console.log('Container found:', container);
+
+        if (!container) {
+            console.error('Container #v-pills-reservations .list-group not found!');
+            return;
+        }
 
         if (!reservas || reservas.length === 0) {
             container.innerHTML = '<div class="alert alert-info">No tienes reservas aún.</div>';
             return;
         }
 
-        container.innerHTML = reservas.map(reserva => `
+        const html = reservas.map(reserva => `
             <div class="list-group-item">
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">Reserva ${reserva.CodigoReserva || reserva.IdReserva}</h5>
@@ -155,6 +161,10 @@ export const UserController = {
                 <small>ID: ${reserva.IdReserva}</small>
             </div>
         `).join('');
+
+        console.log('Generated HTML:', html);
+        container.innerHTML = html;
+        console.log('HTML set to container');
     },
 
     loadUserInvoices: async () => {
