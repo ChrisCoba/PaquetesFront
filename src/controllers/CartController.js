@@ -120,6 +120,8 @@ export const CartController = {
 
             // 3. Create Holds for all items
             const holds = [];
+            const availabilityAlerts = []; // Para acumular alertas de disponibilidad
+
             for (const item of cart) {
                 const totalPersonas = parseInt(item.adults) + parseInt(item.children);
 
@@ -139,7 +141,43 @@ export const CartController = {
                     throw new Error(`No se pudo reservar el tour: ${item.name}`);
                 }
 
+                // Mostrar información de cupos disponibles con badges
+                if (holdData.CuposDisponibles !== undefined && holdData.CuposDisponibles !== null) {
+                    const cuposDisponibles = holdData.CuposDisponibles;
+                    let badge = '';
+                    let alert = null;
+
+                    if (cuposDisponibles <= 0) {
+                        badge = '🔴 ÚLTIMA PLAZA';
+                        alert = `🔴 "${item.name}" - ¡ÚLTIMA PLAZA RESERVADA!`;
+                    } else if (cuposDisponibles <= 3) {
+                        badge = '🔴 ÚLTIMAS PLAZAS';
+                        alert = `🔴 "${item.name}" - Solo quedan ${cuposDisponibles} plazas`;
+                    } else if (cuposDisponibles <= 5) {
+                        badge = '🟠 POCAS PLAZAS';
+                        alert = `🟠 "${item.name}" - Quedan ${cuposDisponibles} cupos disponibles`;
+                    } else if (cuposDisponibles <= 10) {
+                        badge = '🟡 DISPONIBILIDAD LIMITADA';
+                    } else {
+                        badge = '✅ DISPONIBLE';
+                    }
+
+                    console.log(`${badge} - Hold creado para "${item.name}". Cupos disponibles: ${cuposDisponibles}`);
+
+                    if (alert) {
+                        availabilityAlerts.push(alert);
+                    }
+                }
+
                 holds.push({ item, holdId: holdData.HoldId });
+            }
+
+            // Si hay alertas de disponibilidad, mostrarlas al usuario
+            if (availabilityAlerts.length > 0) {
+                const alertMessage = '⚠️ ATENCIÓN - DISPONIBILIDAD LIMITADA:\n\n' + availabilityAlerts.join('\n');
+                console.warn(alertMessage);
+                // Opcional: Podrías mostrar un alert aquí si lo deseas
+                // alert(alertMessage);
             }
 
             // 4. Process Payment
