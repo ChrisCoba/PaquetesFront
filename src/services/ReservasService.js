@@ -117,6 +117,7 @@ export const ReservasService = {
     hold: (data) => USE_SOAP.value ? ReservasServiceSoap.hold(data) : ReservasServiceRest.hold(data),
     book: (data) => USE_SOAP.value ? ReservasServiceSoap.book(data) : ReservasServiceRest.book(data),
     getReservations: () => USE_SOAP.value ? ReservasServiceSoap.getReservations() : ReservasServiceRest.getReservations(),
+    getReservationsByUser: (userId) => ReservasServiceRest.getReservationsByUser(userId), // Always use REST for user-specific reservations
     getReservationDetails: (id) => ReservasServiceRest.getReservationDetails(id), // Always use REST for admin details for now
     updateReservationStatus: (reservationId, newStatus) => ReservasServiceRest.updateReservationStatus(reservationId, newStatus)
 };
