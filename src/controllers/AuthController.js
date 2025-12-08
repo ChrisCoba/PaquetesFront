@@ -30,9 +30,29 @@ export const AuthController = {
     },
 
     setupRealTimeValidation: () => {
+        const nombresInput = document.getElementById('nombres');
+        const apellidosInput = document.getElementById('apellidos');
         const identificacionInput = document.getElementById('identificacion');
         const correoInput = document.getElementById('correo');
         const contrasenaInput = document.getElementById('contrasena');
+
+        if (nombresInput) {
+            nombresInput.addEventListener('input', (e) => {
+                // Remove any character that is not a letter or space (including accents)
+                e.target.value = e.target.value.replace(/[^a-zA-Z\sáéíóúÁÉÍÓÚñÑ]/g, '');
+                AuthController.validateNombres();
+            });
+            nombresInput.addEventListener('blur', AuthController.validateNombres);
+        }
+
+        if (apellidosInput) {
+            apellidosInput.addEventListener('input', (e) => {
+                // Remove any character that is not a letter or space (including accents)
+                e.target.value = e.target.value.replace(/[^a-zA-Z\sáéíóúÁÉÍÓÚñÑ]/g, '');
+                AuthController.validateApellidos();
+            });
+            apellidosInput.addEventListener('blur', AuthController.validateApellidos);
+        }
 
         if (identificacionInput) {
             // Restrict input to numbers only and max 10 digits
@@ -60,6 +80,78 @@ export const AuthController = {
             contrasenaInput.addEventListener('input', AuthController.validateContrasena);
             contrasenaInput.addEventListener('blur', AuthController.validateContrasena);
         }
+    },
+
+    validateNombres: () => {
+        const input = document.getElementById('nombres');
+        const feedback = document.getElementById('nombres-feedback');
+
+        if (!input || !feedback) return true;
+
+        const value = input.value.trim();
+
+        if (value.length === 0) {
+            input.classList.remove('is-invalid', 'is-valid');
+            feedback.style.display = 'none';
+            return false;
+        }
+
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            feedback.textContent = 'Solo se permiten letras y espacios.';
+            feedback.style.display = 'block';
+            return false;
+        }
+
+        if (value.length < 2) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            feedback.textContent = 'El nombre debe tener al menos 2 caracteres.';
+            feedback.style.display = 'block';
+            return false;
+        }
+
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        feedback.style.display = 'none';
+        return true;
+    },
+
+    validateApellidos: () => {
+        const input = document.getElementById('apellidos');
+        const feedback = document.getElementById('apellidos-feedback');
+
+        if (!input || !feedback) return true;
+
+        const value = input.value.trim();
+
+        if (value.length === 0) {
+            input.classList.remove('is-invalid', 'is-valid');
+            feedback.style.display = 'none';
+            return false;
+        }
+
+        if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/.test(value)) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            feedback.textContent = 'Solo se permiten letras y espacios.';
+            feedback.style.display = 'block';
+            return false;
+        }
+
+        if (value.length < 2) {
+            input.classList.add('is-invalid');
+            input.classList.remove('is-valid');
+            feedback.textContent = 'El apellido debe tener al menos 2 caracteres.';
+            feedback.style.display = 'block';
+            return false;
+        }
+
+        input.classList.remove('is-invalid');
+        input.classList.add('is-valid');
+        feedback.style.display = 'none';
+        return true;
     },
 
     validateIdentificacion: () => {
@@ -194,11 +286,13 @@ export const AuthController = {
         const password = document.getElementById('contrasena').value;
 
         // Run all validations
+        const isNombresValid = AuthController.validateNombres();
+        const isApellidosValid = AuthController.validateApellidos();
         const isIdentificacionValid = AuthController.validateIdentificacion();
         const isCorreoValid = AuthController.validateCorreo();
         const isContrasenaValid = AuthController.validateContrasena();
 
-        if (!isIdentificacionValid || !isCorreoValid || !isContrasenaValid) {
+        if (!isNombresValid || !isApellidosValid || !isIdentificacionValid || !isCorreoValid || !isContrasenaValid) {
             alert('Por favor corrige los errores en el formulario antes de continuar.');
             return;
         }

@@ -79,12 +79,14 @@
                       <div class="form-group mb-3">
                         <label for="nombres">Nombres</label>
                         <input type="text" name="nombres" id="nombres" class="form-control" required="">
+                        <div id="nombres-feedback" class="invalid-feedback" style="display: none;"></div>
                       </div>
                     </div>
                     <div class="col-md-6">
                       <div class="form-group mb-3">
                         <label for="apellidos">Apellidos</label>
                         <input type="text" name="apellidos" id="apellidos" class="form-control" required="">
+                        <div id="apellidos-feedback" class="invalid-feedback" style="display: none;"></div>
                       </div>
                     </div>
                   </div>
@@ -144,19 +146,19 @@
 
     // Real-time validation for Name and Surname
     document.addEventListener('DOMContentLoaded', () => {
-      const nameInput = document.getElementById('name');
-      const surnameInput = document.getElementById('surname');
+      const nombresInput = document.getElementById('nombres');
+      const apellidosInput = document.getElementById('apellidos');
 
       const validateInput = (e) => {
         // Replace any character that is not a letter or space
         e.target.value = e.target.value.replace(/[^a-zA-Z\sáéíóúÁÉÍÓÚñÑ]/g, '');
       };
 
-      if (nameInput) {
-        nameInput.addEventListener('input', validateInput);
+      if (nombresInput) {
+        nombresInput.addEventListener('input', validateInput);
       }
-      if (surnameInput) {
-        surnameInput.addEventListener('input', validateInput);
+      if (apellidosInput) {
+        apellidosInput.addEventListener('input', validateInput);
       }
     });
   </script>
