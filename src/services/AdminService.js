@@ -178,11 +178,10 @@ export const AdminService = {
     cancelReservation: async (id, reason) => {
         try {
             const response = await fetch(`${API_BASE_URL}/reservas/${id}/cancelar`, {
-                method: 'POST',
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ Motivo: reason })
+                }
             });
 
             const data = await response.json();

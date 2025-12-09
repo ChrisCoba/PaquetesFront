@@ -37,6 +37,20 @@ const ReservasServiceRest = {
         return response.json();
     },
 
+    async cancelReservation(reservaId) {
+        const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/cancelar`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Error al cancelar reserva');
+        }
+
+        return response.json();
+    },
+
     async getReservationDetails(id) {
         // Construct Admin URL manually since API_BASE_URL points to integracion
         const adminUrl = API_BASE_URL.replace('integracion', 'admin');
@@ -119,5 +133,6 @@ export const ReservasService = {
     getReservations: () => USE_SOAP.value ? ReservasServiceSoap.getReservations() : ReservasServiceRest.getReservations(),
     getReservationsByUser: (userId) => ReservasServiceRest.getReservationsByUser(userId), // Always use REST for user-specific reservations
     getReservationDetails: (id) => ReservasServiceRest.getReservationDetails(id), // Always use REST for admin details for now
+    cancelReservation: (reservaId) => ReservasServiceRest.cancelReservation(reservaId), // Always use REST for cancellation
     updateReservationStatus: (reservationId, newStatus) => ReservasServiceRest.updateReservationStatus(reservationId, newStatus)
 };
