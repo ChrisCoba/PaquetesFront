@@ -38,9 +38,10 @@ const ReservasServiceRest = {
     },
 
     async cancelReservation(reservaId) {
-        const response = await fetch(`${API_BASE_URL}/reservas/${reservaId}/cancelar`, {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' }
+        const response = await fetch(`${API_BASE_URL}/cancelar`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id_reserva: reservaId.toString() })
         });
 
         if (!response.ok) {
